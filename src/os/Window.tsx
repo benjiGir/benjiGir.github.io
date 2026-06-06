@@ -35,7 +35,7 @@ export default function Window({ id, appId, title, position, size, zIndex }: Win
   const App = APP_REGISTRY[appId]?.component
 
   function makeDragHandler(
-    startPos: { x: number; y: number },
+    _startPos: { x: number; y: number },
     onMove: (dx: number, dy: number) => void
   ) {
     return (e: React.MouseEvent) => {

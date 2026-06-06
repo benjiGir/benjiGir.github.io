@@ -6,6 +6,7 @@ import CameraRig from '@/scene/CameraRig'
 import PostProcessing from '@/scene/PostProcessing'
 import PowerSequence from '@/scene/PowerSequence'
 
+// @ts-ignore
 const DEBUG = import.meta.env.VITE_DEBUG === 'true'
 
 export default function Experience() {
