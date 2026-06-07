@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useScreenStore } from '@/store/useScreenStore'
 import { usePowerStore } from '@/store/usePowerStore'
-import Desktop, { SCREEN_W, SCREEN_H } from '@/os/Desktop'
+import { SCREEN_W, SCREEN_H } from '@/os/Desktop'
 
 function useViewport() {
   const [vp, setVp] = useState({ w: window.innerWidth, h: window.innerHeight })
@@ -16,6 +16,7 @@ function useViewport() {
 export default function FullscreenOverlay() {
   const isFullscreen = useScreenStore((s) => s.isFullscreen)
   const exit = useScreenStore((s) => s.exit)
+  const setFullscreenEl = useScreenStore((s) => s.setFullscreenEl)
   const power = usePowerStore((s) => s.power)
   const vp = useViewport()
 
@@ -27,7 +28,7 @@ export default function FullscreenOverlay() {
     return () => window.removeEventListener('keydown', handler)
   }, [isFullscreen, exit])
 
-  if (!isFullscreen || power !== 'on') return null
+  if (power !== 'on') return null
 
   // Scale the 1280×720 desktop to fit the viewport (contain)
   const scale = Math.min(vp.w / SCREEN_W, vp.h / SCREEN_H)
@@ -39,7 +40,7 @@ export default function FullscreenOverlay() {
         inset: 0,
         zIndex: 50,
         background: '#000',
-        display: 'flex',
+        display: isFullscreen ? 'flex' : 'none',
         alignItems: 'center',
         justifyContent: 'center',
       }}
@@ -52,7 +53,8 @@ export default function FullscreenOverlay() {
           transformOrigin: 'center center',
         }}
       >
-        <Desktop />
+        {/* Conteneur cible du portail d'écran — voir <ScreenPortal /> */}
+        <div ref={(el) => setFullscreenEl(el)} style={{ width: '100%', height: '100%' }} />
       </div>
     </div>
   )

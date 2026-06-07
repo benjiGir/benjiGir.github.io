@@ -1,9 +1,13 @@
 import { useEffect } from 'react'
 import { usePowerStore } from '@/store/usePowerStore'
 import { useCameraStore } from '@/store/useCameraStore'
-import { playPowerOn, startAmbient, stopAmbient } from '@/lib/audio'
+import { playPowerOn, playLoop, stopLoop } from '@/lib/audio'
 
 const BOOT_DURATION = 3500
+
+/** Place ton fichier d'ambiance dans `public/audio/` et ajuste le chemin ici. */
+const AMBIENT_TRACK = '/audio/ambient.mp3'
+const AMBIENT_VOLUME = 0.2
 
 export default function PowerSequence() {
   const { power, setPower } = usePowerStore()
@@ -17,11 +21,11 @@ export default function PowerSequence() {
       return () => clearTimeout(t)
     }
     if (power === 'on') {
-      startAmbient()
+      playLoop(AMBIENT_TRACK, AMBIENT_VOLUME)
     }
     if (power === 'off') {
       focusOn('overview')
-      stopAmbient()
+      stopLoop()
     }
   }, [power, focusOn, setPower])
 

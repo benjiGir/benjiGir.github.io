@@ -7,6 +7,7 @@ import MobileWarning from '@/components/MobileWarning'
 import AudioUnlock from '@/components/AudioUnlock'
 import MuteToggle from '@/components/MuteToggle'
 import FullscreenOverlay from '@/os/FullscreenOverlay'
+import ScreenPortal from '@/os/ScreenPortal'
 
 export default function App() {
   return (
@@ -24,6 +25,7 @@ export default function App() {
       <Loader />
       <CameraUI />
       <FullscreenOverlay />
+      <ScreenPortal />
       <MobileWarning />
       <AudioUnlock />
       <MuteToggle />

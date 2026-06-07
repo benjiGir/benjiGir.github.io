@@ -23,16 +23,18 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - uses: pnpm/action-setup@v4
+
       - uses: actions/setup-node@v4
         with:
           node-version: 22
-          cache: npm
+          cache: pnpm
 
-      - run: npm ci
+      - run: pnpm install --frozen-lockfile
 
       # Si le repo est username/portfolio (pas un user-site), définis la base :
-      # - run: VITE_BASE_PATH=/portfolio/ npm run build
-      - run: npm run build
+      # - run: VITE_BASE_PATH=/portfolio/ pnpm build
+      - run: pnpm build
 
       - uses: actions/configure-pages@v4
 

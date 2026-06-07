@@ -1,6 +1,6 @@
 import { useState } from 'react'
 
-const EMAIL = 'benjiamin.girard7@gmail.com'
+const EMAIL = 'no-real-email@gmail.com'
 
 function CopyButton({ text }: { text: string }) {
   const [copied, setCopied] = useState(false)

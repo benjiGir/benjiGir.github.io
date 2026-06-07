@@ -4,15 +4,15 @@ import { useScreenStore } from '@/store/useScreenStore'
 import { APP_REGISTRY } from '@/os/appRegistry'
 import { playClick } from '@/lib/audio'
 import Window from '@/os/Window'
+import StartMenu from '@/os/StartMenu'
+import AppIcon from '@/os/AppIcon'
 
 export const SCREEN_W = 1280
 export const SCREEN_H = 720
 
-const APPS = [
-  { id: 'projects', label: 'Projets', bg: '#3b82f6' },
-  { id: 'about', label: 'À propos', bg: '#8b5cf6' },
-  { id: 'contact', label: 'Contact', bg: '#10b981' },
-  { id: 'terminal', label: 'Terminal', bg: '#334155' },
+const DESKTOP_ICONS = [
+  { id: 'recyclebin', label: 'Corbeille', bg: '#64748b', icon: '/icons/bin.png' },
+  { id: 'explorer', label: 'Poste de travail', bg: '#f59e0b', icon: '/icons/pc.png' },
 ]
 
 // ─── Topbar ───────────────────────────────────────────────────────────────────
@@ -99,7 +99,7 @@ function Topbar() {
 
 // ─── Desktop icon ─────────────────────────────────────────────────────────────
 
-function DesktopIcon({ appId, label, bg }: { appId: string; label: string; bg: string }) {
+function DesktopIcon({ appId, label, bg, icon }: { appId: string; label: string; bg: string; icon?: string }) {
   const openWindow = useWindowStore((s) => s.openWindow)
   const [selected, setSelected] = useState(false)
 
@@ -131,24 +131,7 @@ function DesktopIcon({ appId, label, bg }: { appId: string; label: string; bg: s
         outline: 'none',
       }}
     >
-      <div
-        style={{
-          width: 44,
-          height: 44,
-          borderRadius: 12,
-          background: bg,
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          fontSize: 11,
-          fontWeight: 700,
-          color: '#fff',
-          letterSpacing: 0.5,
-          boxShadow: '0 4px 12px rgba(0,0,0,0.4)',
-        }}
-      >
-        {label.slice(0, 2).toUpperCase()}
-      </div>
+      <AppIcon icon={icon} label={label} bg={bg} size={44} />
       <span
         style={{
           fontSize: 10,
@@ -190,8 +173,8 @@ function DesktopArea() {
           gap: 4,
         }}
       >
-        {APPS.map((app) => (
-          <DesktopIcon key={app.id} appId={app.id} label={app.label} bg={app.bg} />
+        {DESKTOP_ICONS.map((item) => (
+          <DesktopIcon key={item.id} appId={item.id} label={item.label} bg={item.bg} icon={item.icon} />
         ))}
       </div>
 
@@ -203,95 +186,140 @@ function DesktopArea() {
   )
 }
 
-// ─── Dock ─────────────────────────────────────────────────────────────────────
+// ─── Taskbar ──────────────────────────────────────────────────────────────────
 
-function DockItem({ id, label, bg }: { id: string; label: string; bg: string }) {
-  const openWindow = useWindowStore((s) => s.openWindow)
-  const windows = useWindowStore((s) => s.windows)
-  const [hovered, setHovered] = useState(false)
+function StartButton({ active, onClick }: { active: boolean; onClick: () => void }) {
+  return (
+    <button
+      onClick={onClick}
+      style={{
+        display: 'flex',
+        alignItems: 'center',
+        gap: 8,
+        height: 36,
+        padding: '0 14px',
+        borderRadius: 10,
+        background: active ? 'rgba(255,255,255,0.14)' : 'rgba(255,255,255,0.06)',
+        border: '1px solid rgba(255,255,255,0.1)',
+        color: '#fff',
+        fontSize: 12,
+        fontWeight: 600,
+        letterSpacing: 0.3,
+        cursor: 'pointer',
+        transition: 'background 0.15s ease',
+      }}
+    >
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor">
+        <rect x="2" y="2" width="9" height="9" rx="1.5" />
+        <rect x="13" y="2" width="9" height="9" rx="1.5" />
+        <rect x="2" y="13" width="9" height="9" rx="1.5" />
+        <rect x="13" y="13" width="9" height="9" rx="1.5" />
+      </svg>
+      Démarrer
+    </button>
+  )
+}
 
-  const win = windows.find((w) => w.appId === id)
-  const isOpen = !!win
-  const isMinimized = win?.minimized ?? false
+function TaskbarWindow({ id, appId, title, minimized }: { id: string; appId: string; title: string; minimized: boolean }) {
+  const { focusWindow, minimizeWindow } = useWindowStore()
+  const meta = APP_REGISTRY[appId]
+  const bg = meta?.color ?? '#475569'
+  const icon = meta?.icon
 
-  function activate() {
-    const meta = APP_REGISTRY[id]
-    if (meta) {
-      playClick()
-      openWindow(id, meta)
-    }
+  function toggle() {
+    playClick()
+    if (minimized) focusWindow(id)
+    else minimizeWindow(id)
   }
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4 }}>
-      <div
-        onClick={activate}
-        onMouseEnter={() => setHovered(true)}
-        onMouseLeave={() => setHovered(false)}
-        style={{
-          width: 52,
-          height: 52,
-          borderRadius: 14,
-          background: bg,
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          cursor: 'pointer',
-          transform: hovered ? 'scale(1.15) translateY(-4px)' : 'scale(1)',
-          transition: 'transform 0.15s ease',
-          boxShadow: hovered
-            ? `0 8px 24px ${bg}55`
-            : isOpen
-              ? `0 4px 16px ${bg}44`
-              : '0 2px 8px rgba(0,0,0,0.4)',
-          opacity: isMinimized ? 0.5 : 1,
-          fontSize: 11,
-          fontWeight: 700,
-          color: '#fff',
-          letterSpacing: 0.5,
-          userSelect: 'none',
-        }}
-      >
-        {label.slice(0, 2).toUpperCase()}
+    <button
+      onClick={toggle}
+      title={title}
+      style={{
+        display: 'flex',
+        alignItems: 'center',
+        gap: 8,
+        height: 36,
+        padding: '0 12px',
+        borderRadius: 10,
+        background: minimized ? 'rgba(255,255,255,0.04)' : 'rgba(255,255,255,0.12)',
+        border: '1px solid rgba(255,255,255,0.08)',
+        color: 'rgba(255,255,255,0.85)',
+        fontSize: 11,
+        cursor: 'pointer',
+        opacity: minimized ? 0.55 : 1,
+      }}
+    >
+      {icon ? (
+        <img src={icon} alt="" draggable={false} style={{ width: 18, height: 18, objectFit: 'contain', flexShrink: 0 }} />
+      ) : (
+        <span
+          style={{
+            width: 8,
+            height: 8,
+            borderRadius: '50%',
+            background: bg,
+            flexShrink: 0,
+          }}
+        />
+      )}
+      {title}
+    </button>
+  )
+}
+
+function Clock() {
+  const [time, setTime] = useState(() => new Date())
+
+  useEffect(() => {
+    const t = setInterval(() => setTime(new Date()), 1000)
+    return () => clearInterval(t)
+  }, [])
+
+  return (
+    <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.7)', textAlign: 'right', lineHeight: 1.3 }}>
+      <div>{time.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })}</div>
+      <div style={{ fontSize: 10, color: 'rgba(255,255,255,0.4)' }}>
+        {time.toLocaleDateString('fr-FR', { day: '2-digit', month: '2-digit', year: 'numeric' })}
       </div>
-      {/* Open indicator */}
-      <div
-        style={{
-          width: 4,
-          height: 4,
-          borderRadius: '50%',
-          background: isOpen ? 'rgba(255,255,255,0.6)' : 'transparent',
-          transition: 'background 0.2s',
-        }}
-      />
     </div>
   )
 }
 
-function Dock() {
+function Taskbar() {
+  const windows = useWindowStore((s) => s.windows)
+  const [startOpen, setStartOpen] = useState(false)
+
   return (
-    <div
-      style={{
-        position: 'absolute',
-        bottom: 14,
-        left: '50%',
-        transform: 'translateX(-50%)',
-        display: 'flex',
-        gap: 10,
-        padding: '10px 16px 6px',
-        background: 'rgba(255,255,255,0.08)',
-        backdropFilter: 'blur(24px)',
-        WebkitBackdropFilter: 'blur(24px)',
-        borderRadius: 20,
-        border: '1px solid rgba(255,255,255,0.12)',
-        boxShadow: '0 4px 32px rgba(0,0,0,0.5)',
-        zIndex: 1000,
-      }}
-    >
-      {APPS.map((app) => (
-        <DockItem key={app.id} id={app.id} label={app.label} bg={app.bg} />
-      ))}
-    </div>
+    <>
+      {startOpen && <StartMenu onClose={() => setStartOpen(false)} />}
+      <div
+        style={{
+          flexShrink: 0,
+          height: 52,
+          display: 'flex',
+          alignItems: 'center',
+          gap: 10,
+          padding: '0 12px',
+          background: 'rgba(255,255,255,0.06)',
+          backdropFilter: 'blur(24px)',
+          WebkitBackdropFilter: 'blur(24px)',
+          borderTop: '1px solid rgba(255,255,255,0.1)',
+          zIndex: 1000,
+        }}
+      >
+        <StartButton active={startOpen} onClick={() => { playClick(); setStartOpen((v) => !v) }} />
+
+        <div style={{ display: 'flex', alignItems: 'center', gap: 6, flex: 1, overflowX: 'auto' }}>
+          {windows.map((win) => (
+            <TaskbarWindow key={win.id} id={win.id} appId={win.appId} title={win.title} minimized={win.minimized} />
+          ))}
+        </div>
+
+        <Clock />
+      </div>
+    </>
   )
 }
 
@@ -321,7 +349,7 @@ export default function Desktop() {
     >
       <Topbar />
       <DesktopArea />
-      <Dock />
+      <Taskbar />
     </div>
   )
 }

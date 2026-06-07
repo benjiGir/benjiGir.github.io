@@ -1,4 +1,4 @@
-import { Perf } from 'r3f-perf'
+import { Stats } from '@react-three/drei'
 import { useControls } from 'leva'
 import Lighting from '@/scene/Lighting'
 import DeskScene from '@/scene/DeskScene'
@@ -18,7 +18,7 @@ export default function Experience() {
 
   return (
     <>
-      {DEBUG && showPerf && <Perf position="top-left" />}
+      {DEBUG && showPerf && <Stats />}
 
       <PowerSequence />
       <Lighting />

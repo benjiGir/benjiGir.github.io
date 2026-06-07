@@ -1,8 +1,13 @@
-// Moteur audio procédural — synthétise les sons via Web Audio API, aucun asset requis.
+ // Moteur audio — sons UI synthétisés via Web Audio API + lecture de fichiers en boucle pour l'ambiance.
 
 let ctx: AudioContext | null = null
 let master: GainNode | null = null
-let ambient: { oscillators: OscillatorNode[]; gain: GainNode } | null = null
+let loop: {
+  src: string
+  el: HTMLAudioElement
+  source: MediaElementAudioSourceNode
+  gain: GainNode
+} | null = null
 
 function getCtx(): AudioContext {
   if (!ctx) {
@@ -60,37 +65,42 @@ export function playPowerOn() {
   osc.stop(now + 1.4)
 }
 
-/** Bourdonnement d'ambiance — deux graves filtrés, en boucle, très discret. */
-export function startAmbient() {
-  if (ambient || !master) return
-  const c = getCtx()
+/**
+ * Joue un fichier audio en boucle (ambiance, musique de fond...).
+ * `src` est une URL servie statiquement, ex. `/audio/ambient.mp3` (place le fichier dans `public/audio/`).
+ * Si une boucle avec la même source tourne déjà, ne fait rien ; sinon remplace la boucle en cours.
+ */
+export function playLoop(src: string, volume = 0.25) {
+  if (!master) return
+  if (loop?.src === src) return
+  stopLoop()
 
+  const c = getCtx()
+  const el = new Audio(src)
+  el.loop = true
+  el.crossOrigin = 'anonymous'
+
+  const source = c.createMediaElementSource(el)
   const gain = c.createGain()
   gain.gain.value = 0.0001
+  source.connect(gain).connect(master)
 
-  const filter = c.createBiquadFilter()
-  filter.type = 'lowpass'
-  filter.frequency.value = 260
+  void el.play()
+  gain.gain.setTargetAtTime(volume, c.currentTime, 1.2)
 
-  const oscillators = [58, 87].map((freq) => {
-    const osc = c.createOscillator()
-    osc.type = 'sine'
-    osc.frequency.value = freq
-    osc.connect(filter)
-    osc.start()
-    return osc
-  })
-  filter.connect(gain).connect(master)
-
-  gain.gain.setTargetAtTime(0.018, c.currentTime, 1.2)
-  ambient = { oscillators, gain }
+  loop = { src, el, source, gain }
 }
 
-export function stopAmbient() {
-  if (!ambient || !ctx) return
-  const { oscillators, gain } = ambient
+/** Arrête la boucle en cours (fondu de sortie puis coupure). */
+export function stopLoop() {
+  if (!loop || !ctx) return
+  const { el, source, gain } = loop
   const now = ctx.currentTime
   gain.gain.setTargetAtTime(0.0001, now, 0.4)
-  oscillators.forEach((o) => o.stop(now + 1.2))
-  ambient = null
+  setTimeout(() => {
+    el.pause()
+    source.disconnect()
+    gain.disconnect()
+  }, 900)
+  loop = null
 }
