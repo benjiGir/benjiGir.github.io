@@ -86,6 +86,7 @@ function DeskTop() {
 function Monitor() {
   const power = usePowerStore((s) => s.power)
   const setDockedEl = useScreenStore((s) => s.setDockedEl)
+  const isFullscreen = useScreenStore((s) => s.isFullscreen)
   const screenMatRef = useRef<THREE.MeshStandardMaterial>(null)
 
   useFrame((_, delta) => {
@@ -130,7 +131,12 @@ function Monitor() {
       {/* Conteneur cible du portail d'écran — ScreenContent y est projeté par <ScreenPortal />, ce qui
           le garde monté en permanence (état OS préservé) lors des bascules plein écran. */}
       {power !== 'off' && (
-        <Html transform scale={0.0215} position={[0, 1.13, 0.025]}>
+        <Html
+          transform
+          scale={0.0215}
+          position={[0, 1.13, 0.025]}
+          pointerEvents={isFullscreen ? 'none' : 'auto'}
+        >
           <div
             ref={(el) => setDockedEl(el)}
             style={{ width: 1280, height: 720, overflow: 'hidden', borderRadius: 4 }}
