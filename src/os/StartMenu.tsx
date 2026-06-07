@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { useWindowStore } from '@/store/useWindowStore'
 import { useScreenStore } from '@/store/useScreenStore'
+import { usePowerStore } from '@/store/usePowerStore'
 import { APP_REGISTRY } from '@/os/appRegistry'
 import { playClick } from '@/lib/audio'
 import AppIcon from '@/os/AppIcon'
@@ -11,6 +12,15 @@ const PINNED_APPS = [
   { id: 'contact', label: 'Contact', bg: '#10b981', icon: '/icons/contact.png' },
   { id: 'terminal', label: 'Terminal', bg: '#334155', icon: '/icons/terminal.png' },
 ]
+
+function IconPower() {
+  return (
+    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M12 2v8" />
+      <path d="M18.36 6.64a9 9 0 1 1-12.73 0" />
+    </svg>
+  )
+}
 
 function IconExpand() {
   return (
@@ -64,6 +74,7 @@ function StartMenuApp({ id, label, bg, icon }: { id: string; label: string; bg: 
 export default function StartMenu({ onClose }: { onClose: () => void }) {
   const [query, setQuery] = useState('')
   const { isFullscreen, toggle } = useScreenStore()
+  const shutdown = usePowerStore((s) => s.shutdown)
 
   const filtered = PINNED_APPS.filter((app) =>
     app.label.toLowerCase().includes(query.trim().toLowerCase())
@@ -172,25 +183,46 @@ export default function StartMenu({ onClose }: { onClose: () => void }) {
             </div>
             <span style={{ fontSize: 12, color: 'rgba(255,255,255,0.6)' }}>Visiteur</span>
           </div>
-          <button
-            onClick={() => { playClick(); toggle() }}
-            title={isFullscreen ? 'Quitter le plein écran' : 'Plein écran'}
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: 6,
-              padding: '6px 12px',
-              borderRadius: 8,
-              background: 'rgba(255,255,255,0.06)',
-              border: '1px solid rgba(255,255,255,0.1)',
-              color: 'rgba(255,255,255,0.6)',
-              fontSize: 11,
-              cursor: 'pointer',
-            }}
-          >
-            <IconExpand />
-            Plein écran
-          </button>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+            <button
+              onClick={() => { playClick(); toggle() }}
+              title={isFullscreen ? 'Quitter le plein écran' : 'Plein écran'}
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: 6,
+                padding: '6px 12px',
+                borderRadius: 8,
+                background: 'rgba(255,255,255,0.06)',
+                border: '1px solid rgba(255,255,255,0.1)',
+                color: 'rgba(255,255,255,0.6)',
+                fontSize: 11,
+                cursor: 'pointer',
+              }}
+            >
+              <IconExpand />
+              Plein écran
+            </button>
+            <button
+              onClick={() => { playClick(); shutdown(); onClose() }}
+              title="Arrêter l'ordinateur"
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: 6,
+                padding: '6px 12px',
+                borderRadius: 8,
+                background: 'rgba(255,255,255,0.06)',
+                border: '1px solid rgba(255,255,255,0.1)',
+                color: 'rgba(255,255,255,0.6)',
+                fontSize: 11,
+                cursor: 'pointer',
+              }}
+            >
+              <IconPower />
+              Arrêter
+            </button>
+          </div>
         </div>
       </div>
     </>

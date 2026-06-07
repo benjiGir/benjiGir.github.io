@@ -141,6 +141,112 @@ function Monitor() {
   )
 }
 
+// ─── Keyboard ─────────────────────────────────────────────────────────────────
+
+function Keyboard() {
+  return (
+    <group position={[-0.05, 0.755, 0.16]} rotation={[-0.05, 0, 0]}>
+      {/* Châssis */}
+      <mesh castShadow receiveShadow>
+        <boxGeometry args={[0.32, 0.015, 0.12]} />
+        <meshStandardMaterial color="#2a2a2a" roughness={0.8} metalness={0.1} />
+      </mesh>
+      {/* Touches — grille simplifiée pour suggérer le clavier sans surcharger la scène */}
+      {Array.from({ length: 4 }).map((_, row) =>
+        Array.from({ length: 12 }).map((_, col) => (
+          <mesh
+            key={`${row}-${col}`}
+            position={[-0.135 + col * 0.024, 0.011, -0.04 + row * 0.024]}
+            castShadow
+          >
+            <boxGeometry args={[0.02, 0.006, 0.02]} />
+            <meshStandardMaterial color="#1a1a1a" roughness={0.7} metalness={0.1} />
+          </mesh>
+        ))
+      )}
+    </group>
+  )
+}
+
+// ─── Mouse ────────────────────────────────────────────────────────────────────
+
+function Mouse() {
+  return (
+    <mesh
+      position={[0.18, 0.7605, 0.18]}
+      rotation={[0, 0.3, 0]}
+      scale={[1, 0.6, 1.4]}
+      castShadow
+      receiveShadow
+    >
+      <sphereGeometry args={[0.025, 16, 16]} />
+      <meshStandardMaterial color="#333333" roughness={0.5} metalness={0.2} />
+    </mesh>
+  )
+}
+
+// ─── Desk lamp ────────────────────────────────────────────────────────────────
+
+function DeskLamp() {
+  const ARM_LEN = 0.24
+  const HEAD_LEN = 0.1
+
+  return (
+    // Coin arrière-gauche du plateau — en symétrie avec la tour (arrière-droite),
+    // loin du moniteur, du clavier et de la souris.
+    <group position={[-0.55, 0.75, -0.27]}>
+      {/* Base */}
+      <mesh position={[0, 0.01, 0]} castShadow receiveShadow>
+        <cylinderGeometry args={[0.07, 0.08, 0.02, 24]} />
+        <meshStandardMaterial color="#1a1a1a" roughness={0.4} metalness={0.6} />
+      </mesh>
+
+      {/* Colonne verticale — chaque pièce est chaînée à l'extrémité de la précédente
+          via des groupes imbriqués, pour éviter tout décalage entre les segments. */}
+      <group position={[0, 0.02, 0]}>
+        <mesh position={[0, 0.14, 0]} castShadow>
+          <cylinderGeometry args={[0.015, 0.015, 0.28, 16]} />
+          <meshStandardMaterial color="#1e1e1e" roughness={0.4} metalness={0.7} />
+        </mesh>
+
+        {/* Bras articulé — pivote depuis le sommet de la colonne, incliné vers le plateau */}
+        <group position={[0, 0.28, 0]} rotation={[1.1, 0, -0.5]}>
+          <mesh position={[0, ARM_LEN / 2, 0]} castShadow>
+            <cylinderGeometry args={[0.012, 0.012, ARM_LEN, 16]} />
+            <meshStandardMaterial color="#1e1e1e" roughness={0.4} metalness={0.7} />
+          </mesh>
+
+          {/* Tête / abat-jour — fixée à l'extrémité du bras, ouverture vers le plateau */}
+          <group position={[0, 0.3, 0]}>
+            <mesh position={[0, -HEAD_LEN / 2, 0]} rotation={[-1.5, 0, 0.5]} castShadow>
+              <coneGeometry args={[0.05, HEAD_LEN, 24, 1, true]} />
+              <meshStandardMaterial
+                color="#1a1a1a"
+                roughness={0.5}
+                metalness={0.5}
+                side={THREE.DoubleSide}
+              />
+            </mesh>
+            {/* Source lumineuse chaude projetée par l'ampoule — intensité modérée pour
+                ne pas écraser l'éclairage global défini dans Lighting.tsx */}
+            <spotLight
+              position={[0, -HEAD_LEN, 0]}
+              target-position={[0, -1, 0.3]}
+              color="#ffd9a0"
+              intensity={2.5}
+              angle={0.5}
+              penumbra={0.6}
+              decay={2}
+              distance={1.5}
+              castShadow
+            />
+          </group>
+        </group>
+      </group>
+    </group>
+  )
+}
+
 // ─── Tower ────────────────────────────────────────────────────────────────────
 
 function Tower() {
@@ -171,14 +277,14 @@ function Tower() {
         <boxGeometry args={[0.18, 0.44, 0.38]} />
         <meshStandardMaterial color="#1e1e1e" roughness={0.5} metalness={0.3} />
       </mesh>
-      {/* Bouton power — face avant */}
+      {/* Bouton power — face avant. Allume depuis l'arrêt, éteint depuis l'allumage. */}
       <mesh
         name="Tower_PowerButton"
         position={[0, 0.12, 0.193]}
         rotation={[Math.PI / 2, 0, 0]}
-        onClick={power === 'off' ? () => { playClick(); pressPower() } : undefined}
+        onClick={power !== 'booting' ? () => { playClick(); pressPower() } : undefined}
         onPointerOver={() => {
-          if (power === 'off') document.body.style.cursor = 'pointer'
+          if (power !== 'booting') document.body.style.cursor = 'pointer'
           setHovered(true)
         }}
         onPointerOut={() => {
@@ -189,12 +295,35 @@ function Tower() {
       >
         <cylinderGeometry args={[0.012, 0.012, 0.008, 16]} />
         <meshStandardMaterial
-          color={hovered && power === 'off' ? '#ffffff' : '#cccccc'}
+          color={hovered && power !== 'booting' ? '#ffffff' : '#cccccc'}
           roughness={0.2}
           metalness={0.9}
-          emissive={hovered && power === 'off' ? '#ffffff' : '#000000'}
-          emissiveIntensity={hovered && power === 'off' ? 0.4 : 0}
+          emissive={hovered && power !== 'booting' ? '#ffffff' : '#000000'}
+          emissiveIntensity={hovered && power !== 'booting' ? 0.4 : 0}
         />
+        {/* Info-bulle au survol — indique l'action effectuée par le bouton */}
+        {hovered && power !== 'booting' && (
+          <Html position={[0, 0, -0.05]} center style={{ pointerEvents: 'none' }}>
+            <div
+              style={{
+                padding: '4px 9px',
+                borderRadius: 6,
+                background: 'rgba(0,0,0,0.75)',
+                backdropFilter: 'blur(6px)',
+                WebkitBackdropFilter: 'blur(6px)',
+                border: '1px solid rgba(255,255,255,0.12)',
+                color: 'rgba(255,255,255,0.9)',
+                fontSize: 10,
+                fontWeight: 500,
+                letterSpacing: 0.3,
+                whiteSpace: 'nowrap',
+                userSelect: 'none',
+              }}
+            >
+              {power === 'off' ? 'Allumer' : 'Éteindre'}
+            </div>
+          </Html>
+        )}
       </mesh>
       {/* LED — face avant */}
       <mesh name="Tower_LED" position={[0.05, 0.12, 0.193]}>
@@ -231,6 +360,9 @@ function DeskLiftGroup() {
       <DeskTop />
       <Monitor />
       <Tower />
+      <Keyboard />
+      <Mouse />
+      <DeskLamp />
     </group>
   )
 }

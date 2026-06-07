@@ -56,10 +56,10 @@ export default function AboutApp() {
       {/* Header */}
       <div style={{ marginBottom: 32 }}>
         <div style={{ fontSize: 22, fontWeight: 700, color: '#fff', marginBottom: 4 }}>
-          TODO — Prénom Nom
+          Benjamin G.
         </div>
         <div style={{ fontSize: 13, color: 'rgba(255,255,255,0.45)', letterSpacing: 0.3 }}>
-          TODO — Titre / spécialité
+          Developpeur backend confirmé
         </div>
         <p
           style={{
