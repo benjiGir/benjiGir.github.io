@@ -28,7 +28,9 @@ export default function FullscreenOverlay() {
     return () => window.removeEventListener('keydown', handler)
   }, [isFullscreen, exit])
 
-  if (power !== 'on') return null
+  // Garder le conteneur monté pendant toutes les phases transitoires (bios, booting,
+  // shuttingDown) pour que le portail ait toujours une cible fullscreenEl valide.
+  if (power === 'off') return null
 
   // Scale the 1280×720 desktop to fit the viewport (contain)
   const scale = Math.min(vp.w / SCREEN_W, vp.h / SCREEN_H)
