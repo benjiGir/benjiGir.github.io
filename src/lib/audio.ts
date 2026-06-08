@@ -65,6 +65,41 @@ export function playPowerOn() {
   osc.stop(now + 1.4)
 }
 
+/** Extinction — sweep descendant, façon vieux poste qui s'arrête. */
+export function playPowerOff() {
+  const c = getCtx()
+  if (!master) return
+  const now = c.currentTime
+  const osc = c.createOscillator()
+  const gain = c.createGain()
+  osc.type = 'sine'
+  osc.frequency.setValueAtTime(720, now)
+  osc.frequency.exponentialRampToValueAtTime(90, now + 0.9)
+  gain.gain.setValueAtTime(0.0001, now)
+  gain.gain.exponentialRampToValueAtTime(0.06, now + 0.12)
+  gain.gain.exponentialRampToValueAtTime(0.0001, now + 1.2)
+  osc.connect(gain).connect(master)
+  osc.start(now)
+  osc.stop(now + 1.3)
+}
+
+/** Bip POST façon vieux BIOS — court bip carré aigu. */
+export function playBeep() {
+  const c = getCtx()
+  if (!master) return
+  const now = c.currentTime
+  const osc = c.createOscillator()
+  const gain = c.createGain()
+  osc.type = 'square'
+  osc.frequency.setValueAtTime(980, now)
+  gain.gain.setValueAtTime(0.0001, now)
+  gain.gain.exponentialRampToValueAtTime(0.05, now + 0.01)
+  gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.13)
+  osc.connect(gain).connect(master)
+  osc.start(now)
+  osc.stop(now + 0.14)
+}
+
 /**
  * Joue un fichier audio en boucle (ambiance, musique de fond...).
  * `src` est une URL servie statiquement, ex. `/audio/ambient.mp3` (place le fichier dans `public/audio/`).

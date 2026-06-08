@@ -91,7 +91,9 @@ function Monitor() {
 
   useFrame((_, delta) => {
     if (!screenMatRef.current) return
-    const target = power === 'off' ? 0 : power === 'booting' ? 0.6 : 1.2
+    // Fondu progressif vers le noir pendant l'extinction plutôt qu'un saut brutal à 'off'
+    const target =
+      power === 'off' || power === 'shuttingDown' ? 0 : power === 'on' ? 1.2 : 0.6
     screenMatRef.current.emissiveIntensity = THREE.MathUtils.lerp(
       screenMatRef.current.emissiveIntensity,
       target,
@@ -262,10 +264,16 @@ function Tower() {
   const ledMatRef = useRef<THREE.MeshStandardMaterial>(null)
 
   const ledColor = '#00ff44'
+  // Clignotement façon POST : uniquement pendant le démarrage
+  const isBooting = power === 'bios' || power === 'booting'
+  // Bouton power inerte pendant toute transition en cours (démarrage ou extinction)
+  const isTransitioning = isBooting || power === 'shuttingDown'
 
   useFrame(({ clock }, delta) => {
     if (!ledMatRef.current) return
-    if (power === 'booting') {
+    if (isBooting) {
+      // Clignotement temporel (basé sur l'horloge, pas sur le delta/frame-rate) pour rester
+      // cohérent quel que soit le fps de la machine.
       ledMatRef.current.emissiveIntensity = Math.sin(clock.elapsedTime * 9) > 0 ? 5 : 0
     } else {
       const target = power === 'on' ? 3 : 0
@@ -288,9 +296,9 @@ function Tower() {
         name="Tower_PowerButton"
         position={[0, 0.12, 0.193]}
         rotation={[Math.PI / 2, 0, 0]}
-        onClick={power !== 'booting' ? () => { playClick(); pressPower() } : undefined}
+        onClick={!isTransitioning ? () => { playClick(); pressPower() } : undefined}
         onPointerOver={() => {
-          if (power !== 'booting') document.body.style.cursor = 'pointer'
+          if (!isTransitioning) document.body.style.cursor = 'pointer'
           setHovered(true)
         }}
         onPointerOut={() => {
@@ -301,14 +309,14 @@ function Tower() {
       >
         <cylinderGeometry args={[0.012, 0.012, 0.008, 16]} />
         <meshStandardMaterial
-          color={hovered && power !== 'booting' ? '#ffffff' : '#cccccc'}
+          color={hovered && !isTransitioning ? '#ffffff' : '#cccccc'}
           roughness={0.2}
           metalness={0.9}
-          emissive={hovered && power !== 'booting' ? '#ffffff' : '#000000'}
-          emissiveIntensity={hovered && power !== 'booting' ? 0.4 : 0}
+          emissive={hovered && !isTransitioning ? '#ffffff' : '#000000'}
+          emissiveIntensity={hovered && !isTransitioning ? 0.4 : 0}
         />
         {/* Info-bulle au survol — indique l'action effectuée par le bouton */}
-        {hovered && power !== 'booting' && (
+        {hovered && !isTransitioning && (
           <Html position={[0, 0, -0.05]} center style={{ pointerEvents: 'none' }}>
             <div
               style={{
