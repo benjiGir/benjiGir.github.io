@@ -15,6 +15,9 @@ const ContactApp = lazy(() => import('@/os/apps/ContactApp'))
 const TerminalApp = lazy(() => import('@/os/apps/TerminalApp'))
 const FileExplorerApp = lazy(() => import('@/os/apps/FileExplorerApp'))
 const RecycleBinApp = lazy(() => import('@/os/apps/RecycleBinApp'))
+const CodeEditorApp = lazy(() => import('@/os/apps/CodeEditorApp'))
+// Précharge le chunk CodeMirror dès l'évaluation du module (avant toute ouverture de fenêtre)
+import('@/os/apps/CodeEditorApp')
 
 export const APP_REGISTRY: Record<string, AppMeta> = {
   projects: {
@@ -58,5 +61,11 @@ export const APP_REGISTRY: Record<string, AppMeta> = {
     color: '#64748b',
     icon: '/icons/bin.png',
     component: RecycleBinApp,
+  },
+  editor: {
+    title: 'Éditeur de code',
+    defaultSize: { w: 720, h: 480 },
+    color: '#7c3aed',
+    component: CodeEditorApp,
   },
 }
