@@ -1,4 +1,5 @@
 import { useRef, useState } from 'react'
+import { Geometry, Base, Subtraction } from '@react-three/csg'
 import { useFrame } from '@react-three/fiber'
 import { Html } from '@react-three/drei'
 import * as THREE from 'three'
@@ -381,12 +382,199 @@ function DeskLiftGroup() {
   )
 }
 
+// ─── Room ─────────────────────────────────────────────────────────────────────
+
+// Livres : [largeur, hauteur, couleur]
+const BOOKS: [number, number, string][] = [
+  [0.04, 0.22, '#c0392b'],
+  [0.035, 0.18, '#2980b9'],
+  [0.05, 0.25, '#27ae60'],
+  [0.03, 0.20, '#e67e22'],
+  [0.045, 0.16, '#8e44ad'],
+  [0.04, 0.21, '#d4ac0d'],
+  [0.035, 0.17, '#1a5276'],
+  [0.05, 0.23, '#922b21'],
+]
+
+function Room() {
+  const wallColor = '#b8b2aa'
+  const baseboardColor = '#e8e4de'
+  const wallRoughness = 0.95
+  const wallThickness = 0.08
+
+  // Calcul du décalage X cumulé pour aligner les livres sur l'étagère
+  let bookOffsetX = 0
+
+  return (
+    <group>
+      {/* ── Mur du fond (Z = -3) ── */}
+      <mesh position={[0, 1.5, -3]} receiveShadow>
+        <boxGeometry args={[6.16, 3, wallThickness]} />
+        <meshStandardMaterial color={wallColor} roughness={wallRoughness} metalness={0} />
+      </mesh>
+
+      {/* ── Mur gauche (X = -3) — CSG : mur plein moins l'ouverture de fenêtre ── */}
+      <mesh position={[-3, 1.5, 0]} receiveShadow>
+        <Geometry>
+          {/* Mur complet */}
+          <Base><boxGeometry args={[0.08, 3, 6]} /></Base>
+          {/* Découpe fenêtre — légèrement plus épais que le mur pour une coupe nette */}
+          <Subtraction position={[0, 0, 0.8]}>
+            <boxGeometry args={[0.12, 1.0, 0.76]} />
+          </Subtraction>
+        </Geometry>
+        <meshStandardMaterial color={wallColor} roughness={wallRoughness} metalness={0} />
+      </mesh>
+
+      {/* ── Plinthes ── */}
+      {/* Plinthe mur du fond */}
+      <mesh position={[0, 0.06, -2.96]} receiveShadow>
+        <boxGeometry args={[6.16, 0.12, 0.02]} />
+        <meshStandardMaterial color={baseboardColor} roughness={0.8} metalness={0} />
+      </mesh>
+      {/* Plinthe mur gauche */}
+      <mesh position={[-2.96, 0.06, 0]} receiveShadow>
+        <boxGeometry args={[0.02, 0.12, 6]} />
+        <meshStandardMaterial color={baseboardColor} roughness={0.8} metalness={0} />
+      </mesh>
+
+      {/* ── Tapis sous le bureau ── */}
+      {/* Légèrement surélevé (Y=0.005) pour éviter le z-fighting avec le sol */}
+      <mesh position={[0, 0.005, 0.2]} receiveShadow>
+        <boxGeometry args={[2.2, 0.01, 1.8]} />
+        <meshStandardMaterial color="#8b7355" roughness={0.95} metalness={0} />
+      </mesh>
+
+      {/* ── Étagère murale sur le mur gauche ── */}
+      {/* Planche de l'étagère */}
+      <mesh position={[-2.88, 1.6, -1.0]} castShadow receiveShadow>
+        <boxGeometry args={[0.08, 0.04, 0.8]} />
+        <meshStandardMaterial color="#7a5c3a" roughness={0.7} metalness={0.05} />
+      </mesh>
+      {/* Tasseau de fixation */}
+      <mesh position={[-2.97, 1.56, -1.0]} receiveShadow>
+        <boxGeometry args={[0.02, 0.08, 0.7]} />
+        <meshStandardMaterial color="#5c4020" roughness={0.8} metalness={0.05} />
+      </mesh>
+      {/* Livres sur l'étagère */}
+      {BOOKS.map(([w, h, color], i) => {
+        const x = bookOffsetX + w / 2
+        bookOffsetX += w + 0.008
+        return (
+          <mesh
+            key={i}
+            // Les livres sont centrés sur la longueur de l'étagère (axe Z ici = axe Y monde)
+            position={[-2.84, 1.62 + h / 2, -1.32 + x]}
+            castShadow
+          >
+            <boxGeometry args={[0.06, h, w]} />
+            <meshStandardMaterial color={color} roughness={0.8} metalness={0} />
+          </mesh>
+        )
+      })}
+
+      {/* ── Cadre photo sur le mur du fond ── */}
+      {/* Cadre extérieur */}
+      <mesh position={[-1.2, 1.7, -2.96]} castShadow>
+        <boxGeometry args={[0.42, 0.32, 0.025]} />
+        <meshStandardMaterial color="#5c4020" roughness={0.6} metalness={0.1} />
+      </mesh>
+      {/* Passeport intérieur (couleur claire) */}
+      <mesh position={[-1.2, 1.7, -2.948]}>
+        <boxGeometry args={[0.36, 0.26, 0.01]} />
+        <meshStandardMaterial color="#c8bfb0" roughness={0.9} metalness={0} />
+      </mesh>
+      {/* Zone photo (gris-bleu évocateur) */}
+      <mesh position={[-1.2, 1.7, -2.942]}>
+        <boxGeometry args={[0.3, 0.2, 0.008]} />
+        <meshStandardMaterial color="#7a8fa6" roughness={0.8} metalness={0} />
+      </mesh>
+
+      {/* ── Plante d'intérieur — coin gauche-fond ── */}
+      {/* Pot */}
+      <mesh position={[-2.5, 0.0, -2.5]} castShadow receiveShadow>
+        <cylinderGeometry args={[0.12, 0.09, 0.22, 20]} />
+        <meshStandardMaterial color="#a0522d" roughness={0.8} metalness={0} />
+      </mesh>
+      {/* Terre */}
+      <mesh position={[-2.5, 0.115, -2.5]} receiveShadow>
+        <cylinderGeometry args={[0.11, 0.11, 0.01, 20]} />
+        <meshStandardMaterial color="#3d2b1f" roughness={0.95} metalness={0} />
+      </mesh>
+      {/* Tronc */}
+      <mesh position={[-2.5, 0.42, -2.5]} castShadow>
+        <cylinderGeometry args={[0.025, 0.035, 0.42, 12]} />
+        <meshStandardMaterial color="#5c4020" roughness={0.85} metalness={0} />
+      </mesh>
+      {/* Feuillage — sphère principale */}
+      <mesh position={[-2.5, 0.78, -2.5]} castShadow>
+        <sphereGeometry args={[0.26, 16, 16]} />
+        <meshStandardMaterial color="#2d5a27" roughness={0.85} metalness={0} />
+      </mesh>
+      {/* Feuillage — lobes latéraux pour plus de volume */}
+      <mesh position={[-2.68, 0.72, -2.5]} castShadow>
+        <sphereGeometry args={[0.18, 12, 12]} />
+        <meshStandardMaterial color="#234d1e" roughness={0.85} metalness={0} />
+      </mesh>
+      <mesh position={[-2.5, 0.72, -2.68]} castShadow>
+        <sphereGeometry args={[0.16, 12, 12]} />
+        <meshStandardMaterial color="#2a5424" roughness={0.85} metalness={0} />
+      </mesh>
+
+      {/* ── Fenêtre sur le mur gauche ── */}
+      {/* 4 bandes formant un vrai cadre creux (ouverture centrale 0.64m × 0.88m) */}
+      {/* Bande haute */}
+      <mesh position={[-2.96, 1.97, 0.8]} castShadow>
+        <boxGeometry args={[0.04, 0.06, 0.76]} />
+        <meshStandardMaterial color='#ccc8c0' roughness={0.6} metalness={0.05} />
+      </mesh>
+      {/* Bande basse */}
+      <mesh position={[-2.96, 1.03, 0.8]} castShadow>
+        <boxGeometry args={[0.04, 0.06, 0.76]} />
+        <meshStandardMaterial color='#ccc8c0' roughness={0.6} metalness={0.05} />
+      </mesh>
+      {/* Bande gauche */}
+      <mesh position={[-2.96, 1.5, 0.45]} castShadow>
+        <boxGeometry args={[0.04, 0.88, 0.06]} />
+        <meshStandardMaterial color='#ccc8c0' roughness={0.6} metalness={0.05} />
+      </mesh>
+      {/* Bande droite */}
+      <mesh position={[-2.96, 1.5, 1.15]} castShadow>
+        <boxGeometry args={[0.04, 0.88, 0.06]} />
+        <meshStandardMaterial color='#ccc8c0' roughness={0.6} metalness={0.05} />
+      </mesh>
+      {/* Vitre translucide — DoubleSide pour être visible depuis les deux côtés */}
+      <mesh position={[-2.94, 1.5, 0.8]}>
+        <boxGeometry args={[0.01, 0.88, 0.64]} />
+        <meshStandardMaterial
+          color='#d4eaf7'
+          roughness={0.05}
+          transparent
+          opacity={0.22}
+          side={THREE.DoubleSide}
+        />
+      </mesh>
+      {/* Croisillon horizontal */}
+      <mesh position={[-2.955, 1.5, 0.8]}>
+        <boxGeometry args={[0.04, 0.03, 0.64]} />
+        <meshStandardMaterial color='#ccc8c0' roughness={0.6} metalness={0.05} />
+      </mesh>
+      {/* Croisillon vertical */}
+      <mesh position={[-2.955, 1.5, 0.8]}>
+        <boxGeometry args={[0.04, 0.88, 0.03]} />
+        <meshStandardMaterial color='#ccc8c0' roughness={0.6} metalness={0.05} />
+      </mesh>
+    </group>
+  )
+}
+
 // ─── Root ─────────────────────────────────────────────────────────────────────
 
 export default function DeskScene() {
   return (
     <group>
       <Floor />
+      <Room />
       <DeskFrame />
       <SitStandPanel />
       <DeskLiftGroup />
