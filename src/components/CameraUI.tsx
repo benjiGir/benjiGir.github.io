@@ -1,13 +1,30 @@
-import { useCameraStore, type CameraPreset } from '@/store/useCameraStore'
+import { useEffect } from 'react'
+import { useCameraStore } from '@/store/useCameraStore'
+import { useScreenStore } from '@/store/useScreenStore'
 import { playClick } from '@/lib/audio'
 
 export default function CameraUI() {
-  const { preset, focusOn } = useCameraStore()
+  const poi = useCameraStore((s) => s.poi)
+  const back = useCameraStore((s) => s.back)
+  const isFullscreen = useScreenStore((s) => s.isFullscreen)
 
-  const buttons: { label: string; value: CameraPreset }[] = [
-    { label: 'Vue ensemble', value: 'overview' },
-    { label: 'Écran', value: 'screen' },
-  ]
+  const showBack = poi !== 'overview' && !isFullscreen
+
+  // Échap → retour à la vue d'ensemble (uniquement hors plein écran OS, où Échap quitte déjà
+  // le plein écran via `FullscreenOverlay`).
+  useEffect(() => {
+    if (!showBack) return
+    const handler = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        playClick()
+        back()
+      }
+    }
+    window.addEventListener('keydown', handler)
+    return () => window.removeEventListener('keydown', handler)
+  }, [showBack, back])
+
+  if (!showBack) return null
 
   return (
     <div
@@ -21,27 +38,24 @@ export default function CameraUI() {
         zIndex: 10,
       }}
     >
-      {buttons.map(({ label, value }) => (
-        <button
-          key={value}
-          onClick={() => { playClick(); focusOn(value) }}
-          style={{
-            padding: '8px 16px',
-            borderRadius: 6,
-            border: 'none',
-            cursor: 'pointer',
-            fontFamily: 'system-ui, sans-serif',
-            fontSize: 13,
-            fontWeight: 500,
-            background: preset === value ? 'rgba(255,255,255,0.9)' : 'rgba(255,255,255,0.2)',
-            color: preset === value ? '#111' : '#fff',
-            backdropFilter: 'blur(8px)',
-            transition: 'background 0.2s, color 0.2s',
-          }}
-        >
-          {label}
-        </button>
-      ))}
+      <button
+        onClick={() => { playClick(); back() }}
+        style={{
+          padding: '8px 16px',
+          borderRadius: 6,
+          border: 'none',
+          cursor: 'pointer',
+          fontFamily: 'system-ui, sans-serif',
+          fontSize: 13,
+          fontWeight: 500,
+          background: 'rgba(255,255,255,0.2)',
+          color: '#fff',
+          backdropFilter: 'blur(8px)',
+          transition: 'background 0.2s, color 0.2s',
+        }}
+      >
+        ← Retour
+      </button>
     </div>
   )
 }

@@ -6,6 +6,7 @@ import { playClick } from '@/lib/audio'
 import Window from '@/os/Window'
 import StartMenu from '@/os/StartMenu'
 import AppIcon from '@/os/AppIcon'
+import Toasts from '@/os/Toasts'
 
 export const SCREEN_W = 1280
 export const SCREEN_H = 720
@@ -350,6 +351,7 @@ export default function Desktop() {
       <Topbar />
       <DesktopArea />
       <Taskbar />
+      <Toasts />
     </div>
   )
 }

@@ -22,25 +22,16 @@ export const projects: Project[] = [
     year: 2026,
   },
   {
-    id: 'project-astr',
-    name: 'ASTR',
+    id: 'Re-astr',
+    name: 'RE-ASTR',
     tagline: 'Outil de gestion et de partage d`archive de test',
     description:
-      'TBD',
+      'ASTR est un outil de gestion d`archive de test. Conçu pour faciliter la creation d`archives de test, leur partage' +
+      'entre les différentes équipes que ce soit via un lien de consultation ou le téléchargement de l`archive complète. ' +
+      'L`application est composée d`une interface web pour la gestion des archives et d`une API REST pour les opérations de backend.',
     stack: ['TypeScript', 'React', 'NestJS', 'PostgreSQL', 'Docker'],
-    links: [{ label: 'Repository front', url: '#' },{ label: 'Repository back', url: '#' }],
+    links: [{ label: 'Repository front', url: 'https://github.com/benjiGir/re-astr-front' },{ label: 'Repository back', url: 'https://github.com/benjiGir/re-astr-back' }],
     color: '#8b5cf6',
-    year: 2025,
-  },
-  {
-    id: 'project-3',
-    name: 'Projet 3',
-    tagline: 'Courte accroche du projet',
-    description:
-      'Description détaillée à compléter. Remplace ce texte par une présentation de ton projet : contexte, problème résolu, choix techniques, résultats.',
-    stack: ['À', 'compléter'],
-    links: [],
-    color: '#10b981',
     year: 2024,
-  },
+  }
 ]

@@ -1,6 +1,7 @@
-import { useEffect } from 'react'
+import { useEffect, useRef } from 'react'
 import { usePowerStore } from '@/store/usePowerStore'
 import { useCameraStore } from '@/store/useCameraStore'
+import { useToastStore } from '@/store/useToastStore'
 import { playPowerOn, playPowerOff, playBeep, playLoop, stopLoop } from '@/lib/audio'
 
 /** Durée de l'écran POST/BIOS façon vieux PC, avant le chargement de l'OS. */
@@ -17,6 +18,9 @@ const AMBIENT_VOLUME = 0.2
 export default function PowerSequence() {
   const { power, setPower } = usePowerStore()
   const focusOn = useCameraStore((s) => s.focusOn)
+  const back = useCameraStore((s) => s.back)
+  const pushToast = useToastStore((s) => s.push)
+  const hasGreeted = useRef(false)
 
   useEffect(() => {
     if (power === 'bios') {
@@ -35,6 +39,14 @@ export default function PowerSequence() {
     }
     if (power === 'on') {
       playLoop(AMBIENT_TRACK, AMBIENT_VOLUME)
+      // Toast de bienvenue — uniquement au tout premier démarrage de la session.
+      if (!hasGreeted.current) {
+        hasGreeted.current = true
+        pushToast({
+          title: 'Bienvenue sur Bureau OS',
+          body: 'Explorez le bureau, les fenêtres et les coins de la pièce.',
+        })
+      }
     }
     if (power === 'shuttingDown') {
       stopLoop()
@@ -43,10 +55,10 @@ export default function PowerSequence() {
       return () => clearTimeout(t)
     }
     if (power === 'off') {
-      focusOn('overview')
+      back()
       stopLoop()
     }
-  }, [power, focusOn, setPower])
+  }, [power, focusOn, back, setPower, pushToast])
 
   return null
 }

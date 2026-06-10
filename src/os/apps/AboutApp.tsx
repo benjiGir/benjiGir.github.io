@@ -1,23 +1,27 @@
-// Remplace les valeurs marquées TODO par tes informations réelles.
-
 const SKILLS = [
-  { category: 'Frontend', items: ['React', 'TypeScript', 'Three.js / R3F', 'CSS'] },
-  { category: 'Backend', items: ['TODO'] },
-  { category: 'Outils', items: ['Git', 'Vite', 'Figma', 'TODO'] },
+  { category: 'Frontend', items: ['React', 'Tanstack'] },
+  { category: 'Backend', items: ['NestJS', 'PostgreSQL'] },
+  { category: 'Outils', items: ['Docker'] },
 ]
 
 const EXPERIENCE = [
   {
-    role: 'TODO — Titre du poste',
-    company: 'Entreprise',
-    period: '20XX – aujourd\'hui',
-    description: 'Description de tes missions et réalisations.',
+    role: 'Développeur backend',
+    company: 'Komity',
+    period: 'Septembre 2022 – aujourd\'hui',
+    description: '',
   },
   {
-    role: 'TODO — Titre du poste',
-    company: 'Entreprise',
-    period: '20XX – 20XX',
-    description: 'Description de tes missions et réalisations.',
+    role: 'Developpeur backend',
+    company: 'Implicity',
+    period: 'Fevrier 2022 – Septembre 2022',
+    description: '',
+  },
+  {
+    role: 'Technicien intégration mécatronique',
+    company: 'Softbank robotics Europe',
+    period: '2018 – 2021',
+    description: '',
   },
 ]
 
