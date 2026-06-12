@@ -39,7 +39,10 @@ export default function CameraUI() {
       }}
     >
       <button
-        onClick={() => { playClick(); back() }}
+        onClick={() => {
+          playClick()
+          back()
+        }}
         style={{
           padding: '8px 16px',
           borderRadius: 6,

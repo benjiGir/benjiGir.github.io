@@ -144,8 +144,7 @@ export const useRobotStore = create<RobotState>((set, get) => ({
   setQueue: (queue) => set({ queue }),
   addInstruction: (instr) =>
     set((s) => ({ queue: s.queue.length < 16 ? [...s.queue, instr] : s.queue })),
-  removeInstruction: (index) =>
-    set((s) => ({ queue: s.queue.filter((_, i) => i !== index) })),
+  removeInstruction: (index) => set((s) => ({ queue: s.queue.filter((_, i) => i !== index) })),
   reorderInstruction: (from, to) =>
     set((s) => {
       const queue = [...s.queue]

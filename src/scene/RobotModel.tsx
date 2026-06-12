@@ -116,14 +116,26 @@ function Head({
       const t = Math.max(failAnim.current, 0)
       const shake = Math.sin(t * 28) * (t / 0.6) * 0.5
       headRef.current.rotation.y = shake
-      headRef.current.rotation.x = THREE.MathUtils.lerp(headRef.current.rotation.x, 0, 1 - Math.exp(-delta * 8))
+      headRef.current.rotation.x = THREE.MathUtils.lerp(
+        headRef.current.rotation.x,
+        0,
+        1 - Math.exp(-delta * 8)
+      )
       return
     }
 
     // ── Suivi du regard (écrit par le composant englobant via `gazeRef`) ou retour au repos ──
     const damp = 1 - Math.exp(-delta * 5)
-    headRef.current.rotation.y = THREE.MathUtils.lerp(headRef.current.rotation.y, gazeRef.current.yaw, damp)
-    headRef.current.rotation.x = THREE.MathUtils.lerp(headRef.current.rotation.x, gazeRef.current.pitch, damp)
+    headRef.current.rotation.y = THREE.MathUtils.lerp(
+      headRef.current.rotation.y,
+      gazeRef.current.yaw,
+      damp
+    )
+    headRef.current.rotation.x = THREE.MathUtils.lerp(
+      headRef.current.rotation.x,
+      gazeRef.current.pitch,
+      damp
+    )
   })
 
   return (
@@ -141,11 +153,21 @@ function Head({
       {/* Yeux émissifs */}
       <mesh position={[-0.022, -0.005, 0.066]}>
         <sphereGeometry args={[0.012, 12, 12]} />
-        <meshStandardMaterial ref={eyeLMatRef} color={EYE_COLOR} emissive={EYE_COLOR} emissiveIntensity={1.4} />
+        <meshStandardMaterial
+          ref={eyeLMatRef}
+          color={EYE_COLOR}
+          emissive={EYE_COLOR}
+          emissiveIntensity={1.4}
+        />
       </mesh>
       <mesh position={[0.022, -0.005, 0.066]}>
         <sphereGeometry args={[0.012, 12, 12]} />
-        <meshStandardMaterial ref={eyeRMatRef} color={EYE_COLOR} emissive={EYE_COLOR} emissiveIntensity={1.4} />
+        <meshStandardMaterial
+          ref={eyeRMatRef}
+          color={EYE_COLOR}
+          emissive={EYE_COLOR}
+          emissiveIntensity={1.4}
+        />
       </mesh>
       {/* Antenne */}
       <mesh position={[0, 0.075, 0]} castShadow>
@@ -154,7 +176,11 @@ function Head({
       </mesh>
       <mesh position={[0, 0.097, 0]}>
         <sphereGeometry args={[0.008, 8, 8]} />
-        <meshStandardMaterial color={ACCENT_COLOR} emissive={ACCENT_COLOR} emissiveIntensity={0.5} />
+        <meshStandardMaterial
+          color={ACCENT_COLOR}
+          emissive={ACCENT_COLOR}
+          emissiveIntensity={0.5}
+        />
       </mesh>
     </group>
   )
@@ -198,8 +224,16 @@ function Arm({
 
     // Balancement de marche, sinon léger repos
     const swing = Math.sin(walkPhase.current) * 0.35 * sign
-    groupRef.current.rotation.x = THREE.MathUtils.lerp(groupRef.current.rotation.x, swing, 1 - Math.exp(-delta * 8))
-    groupRef.current.rotation.z = THREE.MathUtils.lerp(groupRef.current.rotation.z, 0, 1 - Math.exp(-delta * 8))
+    groupRef.current.rotation.x = THREE.MathUtils.lerp(
+      groupRef.current.rotation.x,
+      swing,
+      1 - Math.exp(-delta * 8)
+    )
+    groupRef.current.rotation.z = THREE.MathUtils.lerp(
+      groupRef.current.rotation.z,
+      0,
+      1 - Math.exp(-delta * 8)
+    )
   })
 
   return (
@@ -221,7 +255,11 @@ function Leg({ side, walkPhase }: { side: 'left' | 'right'; walkPhase: MutableRe
   useFrame((_, delta) => {
     if (!groupRef.current) return
     const swing = Math.sin(walkPhase.current + Math.PI) * 0.3 * sign
-    groupRef.current.rotation.x = THREE.MathUtils.lerp(groupRef.current.rotation.x, swing, 1 - Math.exp(-delta * 8))
+    groupRef.current.rotation.x = THREE.MathUtils.lerp(
+      groupRef.current.rotation.x,
+      swing,
+      1 - Math.exp(-delta * 8)
+    )
   })
 
   return (
@@ -290,17 +328,8 @@ const RobotModel = forwardRef<RobotModelHandle>(function RobotModel(_, ref) {
     const group = groupRef.current
     if (!group) return
 
-    const {
-      col,
-      row,
-      dir,
-      runState,
-      currentStep,
-      step,
-      beepTick,
-      danceTick,
-      resetToLevelStart,
-    } = useRobotStore.getState()
+    const { col, row, dir, runState, currentStep, step, beepTick, danceTick, resetToLevelStart } =
+      useRobotStore.getState()
 
     const [targetX, targetZ] = cellToWorld(col, row)
     const targetAngle = DIRECTION_ANGLES[dir as Direction]

@@ -20,8 +20,12 @@ export default function CameraRig() {
     controls.maxDistance = p.maxDist ?? DEFAULT_MAX_DISTANCE
 
     void controls.setLookAt(
-      p.pos[0], p.pos[1], p.pos[2],
-      p.target[0], p.target[1], p.target[2],
+      p.pos[0],
+      p.pos[1],
+      p.pos[2],
+      p.target[0],
+      p.target[1],
+      p.target[2],
       true
     )
   }, [poi])

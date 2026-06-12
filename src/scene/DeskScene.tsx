@@ -8,6 +8,7 @@ import { useDeskStore } from '@/store/useDeskStore'
 import { useScreenStore } from '@/store/useScreenStore'
 import { playClick } from '@/lib/audio'
 import Hotspot from '@/scene/Hotspot'
+import Editable from '@/editor/Editable'
 import Robot from '@/scene/Robot'
 import Guitar from '@/scene/Guitar'
 import Workbench from '@/scene/Workbench'
@@ -55,7 +56,10 @@ function SitStandPanel() {
   return (
     <mesh
       position={[0.668, 0.45, 0.32]}
-      onClick={() => { playClick(); toggleHeight() }}
+      onClick={() => {
+        playClick()
+        toggleHeight()
+      }}
       onPointerOver={() => {
         document.body.style.cursor = 'pointer'
         setHovered(true)
@@ -99,8 +103,7 @@ function Monitor() {
   useFrame((_, delta) => {
     if (!screenMatRef.current) return
     // Fondu progressif vers le noir pendant l'extinction plutôt qu'un saut brutal à 'off'
-    const target =
-      power === 'off' || power === 'shuttingDown' ? 0 : power === 'on' ? 1.2 : 0.6
+    const target = power === 'off' || power === 'shuttingDown' ? 0 : power === 'on' ? 1.2 : 0.6
     screenMatRef.current.emissiveIntensity = THREE.MathUtils.lerp(
       screenMatRef.current.emissiveIntensity,
       target,
@@ -162,7 +165,12 @@ function Monitor() {
 
 function Keyboard() {
   return (
-    <group position={[-0.05, 0.755, 0.16]} rotation={[-0.05, 0, 0]}>
+    <Editable
+      id="keyboard"
+      label="Clavier"
+      position={[-0.05, 0.755, 0.16]}
+      rotation={[-0.05, 0, 0]}
+    >
       {/* Châssis */}
       <mesh castShadow receiveShadow>
         <boxGeometry args={[0.32, 0.015, 0.12]} />
@@ -181,7 +189,7 @@ function Keyboard() {
           </mesh>
         ))
       )}
-    </group>
+    </Editable>
   )
 }
 
@@ -189,16 +197,18 @@ function Keyboard() {
 
 function Mouse() {
   return (
-    <mesh
+    <Editable
+      id="mouse"
+      label="Souris"
       position={[0.18, 0.7605, 0.18]}
       rotation={[0, 0.3, 0]}
       scale={[1, 0.6, 1.4]}
-      castShadow
-      receiveShadow
     >
-      <sphereGeometry args={[0.025, 16, 16]} />
-      <meshStandardMaterial color="#333333" roughness={0.5} metalness={0.2} />
-    </mesh>
+      <mesh castShadow receiveShadow>
+        <sphereGeometry args={[0.025, 16, 16]} />
+        <meshStandardMaterial color="#333333" roughness={0.5} metalness={0.2} />
+      </mesh>
+    </Editable>
   )
 }
 
@@ -211,7 +221,7 @@ function DeskLamp() {
   return (
     // Coin arrière-gauche du plateau — en symétrie avec la tour (arrière-droite),
     // loin du moniteur, du clavier et de la souris.
-    <group position={[-0.55, 0.75, -0.27]}>
+    <Editable id="desk-lamp" label="Lampe" position={[-0.55, 0.75, -0.27]}>
       {/* Base */}
       <mesh position={[0, 0.01, 0]} castShadow receiveShadow>
         <cylinderGeometry args={[0.07, 0.08, 0.02, 24]} />
@@ -260,7 +270,7 @@ function DeskLamp() {
           </group>
         </group>
       </group>
-    </group>
+    </Editable>
   )
 }
 
@@ -295,7 +305,7 @@ function Tower() {
   })
 
   return (
-    <group position={[0.48, 0.97, -0.17]}>
+    <Editable id="tower" label="Tour" position={[0.48, 0.97, -0.17]}>
       <mesh name="Tower_Body" castShadow receiveShadow>
         <boxGeometry args={[0.18, 0.44, 0.38]} />
         <meshStandardMaterial color="#1e1e1e" roughness={0.5} metalness={0.3} />
@@ -305,7 +315,14 @@ function Tower() {
         name="Tower_PowerButton"
         position={[0, 0.12, 0.193]}
         rotation={[Math.PI / 2, 0, 0]}
-        onClick={!isTransitioning ? () => { playClick(); pressPower() } : undefined}
+        onClick={
+          !isTransitioning
+            ? () => {
+                playClick()
+                pressPower()
+              }
+            : undefined
+        }
         onPointerOver={() => {
           if (!isTransitioning) document.body.style.cursor = 'pointer'
           setHovered(true)
@@ -358,7 +375,7 @@ function Tower() {
           emissiveIntensity={0}
         />
       </mesh>
-    </group>
+    </Editable>
   )
 }
 
@@ -397,7 +414,7 @@ const BOOKS: [number, number, string][] = [
   [0.04, 0.22, '#c0392b'],
   [0.035, 0.18, '#2980b9'],
   [0.05, 0.25, '#27ae60'],
-  [0.03, 0.20, '#e67e22'],
+  [0.03, 0.2, '#e67e22'],
   [0.045, 0.16, '#8e44ad'],
   [0.04, 0.21, '#d4ac0d'],
   [0.035, 0.17, '#1a5276'],
@@ -425,7 +442,9 @@ function Room() {
       <mesh position={[-4, 1.5, 0]} receiveShadow>
         <Geometry>
           {/* Mur complet */}
-          <Base><boxGeometry args={[0.08, 3, 8]} /></Base>
+          <Base>
+            <boxGeometry args={[0.08, 3, 8]} />
+          </Base>
           {/* Découpe fenêtre — légèrement plus épais que le mur pour une coupe nette */}
           <Subtraction position={[0, 0, 1.5]}>
             <boxGeometry args={[0.12, 1.0, 0.76]} />
@@ -454,124 +473,132 @@ function Room() {
       </mesh>
 
       {/* ── Étagère murale sur le mur gauche ── */}
-      {/* Planche de l'étagère */}
-      <mesh position={[-3.88, 1.6, -2.0]} castShadow receiveShadow>
-        <boxGeometry args={[0.08, 0.04, 0.8]} />
-        <meshStandardMaterial color="#7a5c3a" roughness={0.7} metalness={0.05} />
-      </mesh>
-      {/* Tasseau de fixation */}
-      <mesh position={[-3.97, 1.56, -2.0]} receiveShadow>
-        <boxGeometry args={[0.02, 0.08, 0.7]} />
-        <meshStandardMaterial color="#5c4020" roughness={0.8} metalness={0.05} />
-      </mesh>
-      {/* Livres sur l'étagère */}
-      {BOOKS.map(([w, h, color], i) => {
-        const x = bookOffsetX + w / 2
-        bookOffsetX += w + 0.008
-        return (
-          <mesh
-            key={i}
-            // Les livres sont centrés sur la longueur de l'étagère (axe Z ici = axe Y monde)
-            position={[-3.84, 1.62 + h / 2, -2.32 + x]}
-            castShadow
-          >
-            <boxGeometry args={[0.06, h, w]} />
-            <meshStandardMaterial color={color} roughness={0.8} metalness={0} />
-          </mesh>
-        )
-      })}
+      <Editable id="shelf" label="Étagère">
+        {/* Planche de l'étagère */}
+        <mesh position={[-3.88, 1.6, -2.0]} castShadow receiveShadow>
+          <boxGeometry args={[0.08, 0.04, 0.8]} />
+          <meshStandardMaterial color="#7a5c3a" roughness={0.7} metalness={0.05} />
+        </mesh>
+        {/* Tasseau de fixation */}
+        <mesh position={[-3.97, 1.56, -2.0]} receiveShadow>
+          <boxGeometry args={[0.02, 0.08, 0.7]} />
+          <meshStandardMaterial color="#5c4020" roughness={0.8} metalness={0.05} />
+        </mesh>
+        {/* Livres sur l'étagère */}
+        {BOOKS.map(([w, h, color], i) => {
+          const x = bookOffsetX + w / 2
+          bookOffsetX += w + 0.008
+          return (
+            <mesh
+              key={i}
+              // Les livres sont centrés sur la longueur de l'étagère (axe Z ici = axe Y monde)
+              position={[-3.84, 1.62 + h / 2, -2.32 + x]}
+              castShadow
+            >
+              <boxGeometry args={[0.06, h, w]} />
+              <meshStandardMaterial color={color} roughness={0.8} metalness={0} />
+            </mesh>
+          )
+        })}
+      </Editable>
 
       {/* ── Cadre photo sur le mur du fond ── */}
-      {/* Cadre extérieur */}
-      <mesh position={[-1.2, 1.7, -3.96]} castShadow>
-        <boxGeometry args={[0.42, 0.32, 0.025]} />
-        <meshStandardMaterial color="#5c4020" roughness={0.6} metalness={0.1} />
-      </mesh>
-      {/* Passeport intérieur (couleur claire) */}
-      <mesh position={[-1.2, 1.7, -3.948]}>
-        <boxGeometry args={[0.36, 0.26, 0.01]} />
-        <meshStandardMaterial color="#c8bfb0" roughness={0.9} metalness={0} />
-      </mesh>
-      {/* Zone photo (gris-bleu évocateur) */}
-      <mesh position={[-1.2, 1.7, -3.942]}>
-        <boxGeometry args={[0.3, 0.2, 0.008]} />
-        <meshStandardMaterial color="#7a8fa6" roughness={0.8} metalness={0} />
-      </mesh>
+      <Editable id="photo" label="Cadre photo">
+        {/* Cadre extérieur */}
+        <mesh position={[-1.2, 1.7, -3.96]} castShadow>
+          <boxGeometry args={[0.42, 0.32, 0.025]} />
+          <meshStandardMaterial color="#5c4020" roughness={0.6} metalness={0.1} />
+        </mesh>
+        {/* Passeport intérieur (couleur claire) */}
+        <mesh position={[-1.2, 1.7, -3.948]}>
+          <boxGeometry args={[0.36, 0.26, 0.01]} />
+          <meshStandardMaterial color="#c8bfb0" roughness={0.9} metalness={0} />
+        </mesh>
+        {/* Zone photo (gris-bleu évocateur) */}
+        <mesh position={[-1.2, 1.7, -3.942]}>
+          <boxGeometry args={[0.3, 0.2, 0.008]} />
+          <meshStandardMaterial color="#7a8fa6" roughness={0.8} metalness={0} />
+        </mesh>
+      </Editable>
 
       {/* ── Plante d'intérieur — coin gauche-fond ── */}
-      {/* Pot */}
-      <mesh position={[-3.5, 0.0, -3.5]} castShadow receiveShadow>
-        <cylinderGeometry args={[0.12, 0.09, 0.22, 20]} />
-        <meshStandardMaterial color="#a0522d" roughness={0.8} metalness={0} />
-      </mesh>
-      {/* Terre */}
-      <mesh position={[-3.5, 0.115, -3.5]} receiveShadow>
-        <cylinderGeometry args={[0.11, 0.11, 0.01, 20]} />
-        <meshStandardMaterial color="#3d2b1f" roughness={0.95} metalness={0} />
-      </mesh>
-      {/* Tronc */}
-      <mesh position={[-3.5, 0.42, -3.5]} castShadow>
-        <cylinderGeometry args={[0.025, 0.035, 0.42, 12]} />
-        <meshStandardMaterial color="#5c4020" roughness={0.85} metalness={0} />
-      </mesh>
-      {/* Feuillage — sphère principale */}
-      <mesh position={[-3.5, 0.78, -3.5]} castShadow>
-        <sphereGeometry args={[0.26, 16, 16]} />
-        <meshStandardMaterial color="#2d5a27" roughness={0.85} metalness={0} />
-      </mesh>
-      {/* Feuillage — lobes latéraux pour plus de volume */}
-      <mesh position={[-3.68, 0.72, -3.5]} castShadow>
-        <sphereGeometry args={[0.18, 12, 12]} />
-        <meshStandardMaterial color="#234d1e" roughness={0.85} metalness={0} />
-      </mesh>
-      <mesh position={[-3.5, 0.72, -3.68]} castShadow>
-        <sphereGeometry args={[0.16, 12, 12]} />
-        <meshStandardMaterial color="#2a5424" roughness={0.85} metalness={0} />
-      </mesh>
+      <Editable id="plant" label="Plante">
+        {/* Pot */}
+        <mesh position={[-3.5, 0.0, -3.5]} castShadow receiveShadow>
+          <cylinderGeometry args={[0.12, 0.09, 0.22, 20]} />
+          <meshStandardMaterial color="#a0522d" roughness={0.8} metalness={0} />
+        </mesh>
+        {/* Terre */}
+        <mesh position={[-3.5, 0.115, -3.5]} receiveShadow>
+          <cylinderGeometry args={[0.11, 0.11, 0.01, 20]} />
+          <meshStandardMaterial color="#3d2b1f" roughness={0.95} metalness={0} />
+        </mesh>
+        {/* Tronc */}
+        <mesh position={[-3.5, 0.42, -3.5]} castShadow>
+          <cylinderGeometry args={[0.025, 0.035, 0.42, 12]} />
+          <meshStandardMaterial color="#5c4020" roughness={0.85} metalness={0} />
+        </mesh>
+        {/* Feuillage — sphère principale */}
+        <mesh position={[-3.5, 0.78, -3.5]} castShadow>
+          <sphereGeometry args={[0.26, 16, 16]} />
+          <meshStandardMaterial color="#2d5a27" roughness={0.85} metalness={0} />
+        </mesh>
+        {/* Feuillage — lobes latéraux pour plus de volume */}
+        <mesh position={[-3.68, 0.72, -3.5]} castShadow>
+          <sphereGeometry args={[0.18, 12, 12]} />
+          <meshStandardMaterial color="#234d1e" roughness={0.85} metalness={0} />
+        </mesh>
+        <mesh position={[-3.5, 0.72, -3.68]} castShadow>
+          <sphereGeometry args={[0.16, 12, 12]} />
+          <meshStandardMaterial color="#2a5424" roughness={0.85} metalness={0} />
+        </mesh>
+      </Editable>
 
       {/* ── Fenêtre sur le mur gauche ── */}
       {/* 4 bandes formant un vrai cadre creux (ouverture centrale 0.64m × 0.88m) */}
-      {/* Bande haute */}
-      <mesh position={[-3.96, 1.97, 1.5]} castShadow>
-        <boxGeometry args={[0.04, 0.06, 0.76]} />
-        <meshStandardMaterial color='#ccc8c0' roughness={0.6} metalness={0.05} />
-      </mesh>
-      {/* Bande basse */}
-      <mesh position={[-3.96, 1.03, 1.5]} castShadow>
-        <boxGeometry args={[0.04, 0.06, 0.76]} />
-        <meshStandardMaterial color='#ccc8c0' roughness={0.6} metalness={0.05} />
-      </mesh>
-      {/* Bande gauche */}
-      <mesh position={[-3.96, 1.5, 1.15]} castShadow>
-        <boxGeometry args={[0.04, 0.88, 0.06]} />
-        <meshStandardMaterial color='#ccc8c0' roughness={0.6} metalness={0.05} />
-      </mesh>
-      {/* Bande droite */}
-      <mesh position={[-3.96, 1.5, 1.85]} castShadow>
-        <boxGeometry args={[0.04, 0.88, 0.06]} />
-        <meshStandardMaterial color='#ccc8c0' roughness={0.6} metalness={0.05} />
-      </mesh>
-      {/* Vitre translucide — DoubleSide pour être visible depuis les deux côtés */}
-      <mesh position={[-3.94, 1.5, 1.5]}>
-        <boxGeometry args={[0.01, 0.88, 0.64]} />
-        <meshStandardMaterial
-          color='#d4eaf7'
-          roughness={0.05}
-          transparent
-          opacity={0.22}
-          side={THREE.DoubleSide}
-        />
-      </mesh>
-      {/* Croisillon horizontal */}
-      <mesh position={[-3.955, 1.5, 1.5]}>
-        <boxGeometry args={[0.04, 0.03, 0.64]} />
-        <meshStandardMaterial color='#ccc8c0' roughness={0.6} metalness={0.05} />
-      </mesh>
-      {/* Croisillon vertical */}
-      <mesh position={[-3.955, 1.5, 1.5]}>
-        <boxGeometry args={[0.04, 0.88, 0.03]} />
-        <meshStandardMaterial color='#ccc8c0' roughness={0.6} metalness={0.05} />
-      </mesh>
+      <Editable id="window" label="Fenêtre">
+        {/* Bande haute */}
+        <mesh position={[-3.96, 1.97, 1.5]} castShadow>
+          <boxGeometry args={[0.04, 0.06, 0.76]} />
+          <meshStandardMaterial color="#ccc8c0" roughness={0.6} metalness={0.05} />
+        </mesh>
+        {/* Bande basse */}
+        <mesh position={[-3.96, 1.03, 1.5]} castShadow>
+          <boxGeometry args={[0.04, 0.06, 0.76]} />
+          <meshStandardMaterial color="#ccc8c0" roughness={0.6} metalness={0.05} />
+        </mesh>
+        {/* Bande gauche */}
+        <mesh position={[-3.96, 1.5, 1.15]} castShadow>
+          <boxGeometry args={[0.04, 0.88, 0.06]} />
+          <meshStandardMaterial color="#ccc8c0" roughness={0.6} metalness={0.05} />
+        </mesh>
+        {/* Bande droite */}
+        <mesh position={[-3.96, 1.5, 1.85]} castShadow>
+          <boxGeometry args={[0.04, 0.88, 0.06]} />
+          <meshStandardMaterial color="#ccc8c0" roughness={0.6} metalness={0.05} />
+        </mesh>
+        {/* Vitre translucide — DoubleSide pour être visible depuis les deux côtés */}
+        <mesh position={[-3.94, 1.5, 1.5]}>
+          <boxGeometry args={[0.01, 0.88, 0.64]} />
+          <meshStandardMaterial
+            color="#d4eaf7"
+            roughness={0.05}
+            transparent
+            opacity={0.22}
+            side={THREE.DoubleSide}
+          />
+        </mesh>
+        {/* Croisillon horizontal */}
+        <mesh position={[-3.955, 1.5, 1.5]}>
+          <boxGeometry args={[0.04, 0.03, 0.64]} />
+          <meshStandardMaterial color="#ccc8c0" roughness={0.6} metalness={0.05} />
+        </mesh>
+        {/* Croisillon vertical */}
+        <mesh position={[-3.955, 1.5, 1.5]}>
+          <boxGeometry args={[0.04, 0.88, 0.03]} />
+          <meshStandardMaterial color="#ccc8c0" roughness={0.6} metalness={0.05} />
+        </mesh>
+      </Editable>
 
       {/* ── Zones réservées (phase 1 : espace vide, mobilier ajouté en phases ultérieures) ── */}
       {/* Coin atelier — mur du fond droit : établi électronique + oscilloscope, voir <Workbench /> */}

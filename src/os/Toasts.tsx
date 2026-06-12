@@ -6,7 +6,10 @@ function ToastItem({ toast }: { toast: Toast }) {
 
   return (
     <div
-      onClick={() => { playClick(); dismiss(toast.id) }}
+      onClick={() => {
+        playClick()
+        dismiss(toast.id)
+      }}
       style={{
         display: 'flex',
         alignItems: 'flex-start',
@@ -26,7 +29,12 @@ function ToastItem({ toast }: { toast: Toast }) {
       }}
     >
       {toast.icon && (
-        <img src={toast.icon} alt="" draggable={false} style={{ width: 28, height: 28, flexShrink: 0 }} />
+        <img
+          src={toast.icon}
+          alt=""
+          draggable={false}
+          style={{ width: 28, height: 28, flexShrink: 0 }}
+        />
       )}
       <div style={{ display: 'flex', flexDirection: 'column', gap: 2, minWidth: 0 }}>
         <span style={{ fontSize: 12, fontWeight: 600, letterSpacing: 0.2 }}>{toast.title}</span>

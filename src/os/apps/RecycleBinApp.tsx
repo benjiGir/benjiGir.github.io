@@ -9,7 +9,16 @@ const DELETED_FILES = [
 
 function IconTrash() {
   return (
-    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.3)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+    <svg
+      width="15"
+      height="15"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="rgba(255,255,255,0.3)"
+      strokeWidth="1.5"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
       <path d="M3 6h18" />
       <path d="M8 6V4a1 1 0 0 1 1-1h6a1 1 0 0 1 1 1v2" />
       <path d="M19 6l-1 14a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1L5 6" />
@@ -19,7 +28,9 @@ function IconTrash() {
 
 export default function RecycleBinApp() {
   return (
-    <div style={{ height: '100%', display: 'flex', flexDirection: 'column', background: '#0d1525' }}>
+    <div
+      style={{ height: '100%', display: 'flex', flexDirection: 'column', background: '#0d1525' }}
+    >
       <div
         style={{
           padding: '12px 16px',
@@ -63,7 +74,14 @@ export default function RecycleBinApp() {
             <span style={{ fontSize: 10, color: 'rgba(255,255,255,0.25)', whiteSpace: 'nowrap' }}>
               {file.date}
             </span>
-            <span style={{ fontSize: 10, color: 'rgba(255,255,255,0.25)', width: 48, textAlign: 'right' }}>
+            <span
+              style={{
+                fontSize: 10,
+                color: 'rgba(255,255,255,0.25)',
+                width: 48,
+                textAlign: 'right',
+              }}
+            >
               {file.size}
             </span>
           </div>

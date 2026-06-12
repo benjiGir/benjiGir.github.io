@@ -354,12 +354,28 @@ function TreeNodeView({
           userSelect: 'none',
         }}
       >
-        <span style={{ fontSize: 9, transition: 'transform 0.15s', display: 'inline-block', transform: open ? 'rotate(90deg)' : 'none' }}>▶</span>
+        <span
+          style={{
+            fontSize: 9,
+            transition: 'transform 0.15s',
+            display: 'inline-block',
+            transform: open ? 'rotate(90deg)' : 'none',
+          }}
+        >
+          ▶
+        </span>
         <span>{node.name}</span>
       </div>
-      {open && node.children.map((child, i) => (
-        <TreeNodeView key={i} node={child} depth={depth + 1} activeFile={activeFile} onOpen={onOpen} />
-      ))}
+      {open &&
+        node.children.map((child, i) => (
+          <TreeNodeView
+            key={i}
+            node={child}
+            depth={depth + 1}
+            activeFile={activeFile}
+            onOpen={onOpen}
+          />
+        ))}
     </div>
   )
 }
@@ -505,12 +521,7 @@ export default function CodeEditorApp() {
             >
               Explorateur
             </div>
-            <TreeNodeView
-              node={TREE}
-              depth={0}
-              activeFile={activeFile}
-              onOpen={openFile}
-            />
+            <TreeNodeView node={TREE} depth={0} activeFile={activeFile} onOpen={openFile} />
           </div>
         )}
 
@@ -555,7 +566,9 @@ export default function CodeEditorApp() {
         }}
       >
         <span style={{ color: '#89b4fa' }}>{activeFile ? langLabel(activeFile) : ''}</span>
-        <span>Ln {lineCol.line}, Col {lineCol.col}</span>
+        <span>
+          Ln {lineCol.line}, Col {lineCol.col}
+        </span>
         <span style={{ marginLeft: 'auto' }}>UTF-8</span>
         <span>bureau-editor</span>
       </div>

@@ -35,7 +35,15 @@ export default function MobileWarning() {
           justifyContent: 'center',
         }}
       >
-        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.5)" strokeWidth="1.5" strokeLinecap="round">
+        <svg
+          width="22"
+          height="22"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="rgba(255,255,255,0.5)"
+          strokeWidth="1.5"
+          strokeLinecap="round"
+        >
           <rect x="2" y="3" width="20" height="14" rx="2" />
           <line x1="8" y1="21" x2="16" y2="21" />
           <line x1="12" y1="17" x2="12" y2="21" />
@@ -43,11 +51,12 @@ export default function MobileWarning() {
       </div>
 
       <div>
-        <div style={{ fontSize: 16, fontWeight: 600, marginBottom: 8 }}>
-          Mieux sur desktop
-        </div>
-        <div style={{ fontSize: 13, color: 'rgba(255,255,255,0.45)', lineHeight: 1.6, maxWidth: 280 }}>
-          Cette expérience 3D est conçue pour un écran d'ordinateur. Sur mobile, certaines interactions peuvent être limitées.
+        <div style={{ fontSize: 16, fontWeight: 600, marginBottom: 8 }}>Mieux sur desktop</div>
+        <div
+          style={{ fontSize: 13, color: 'rgba(255,255,255,0.45)', lineHeight: 1.6, maxWidth: 280 }}
+        >
+          Cette expérience 3D est conçue pour un écran d'ordinateur. Sur mobile, certaines
+          interactions peuvent être limitées.
         </div>
       </div>
 

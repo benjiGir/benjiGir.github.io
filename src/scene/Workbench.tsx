@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef } from 'react'
 import { useFrame } from '@react-three/fiber'
 import * as THREE from 'three'
 import Hotspot from '@/scene/Hotspot'
+import Editable from '@/editor/Editable'
 import { Model as OscilloscopeModel } from '@/scene/OscilloscopeModel'
 import { useCameraStore } from '@/store/useCameraStore'
 import { useCircuitStore } from '@/store/useCircuitStore'
@@ -225,7 +226,7 @@ function Oscilloscope({ active }: { active: boolean }) {
     return tex
   }, [canvas])
 
-  const dataArrayRef = useRef<Uint8Array | null>(null)
+  const dataArrayRef = useRef<Uint8Array<ArrayBuffer> | null>(null)
 
   // Dessin "écran éteint" une fois au montage (et quand on redevient inactif), pour ne pas
   // garder une frame figée d'une ancienne waveform.
@@ -315,11 +316,13 @@ export default function Workbench() {
 
   return (
     <Hotspot poi="workbench" label="Établi électronique" position={[2.4, 0, -3.6]}>
-      <Table />
-      <Breadboard />
-      <SolderingIron />
-      <Multimeter />
-      <Oscilloscope active={poiActive} />
+      <Editable id="workbench" label="Établi électronique">
+        <Table />
+        <Breadboard />
+        <SolderingIron />
+        <Multimeter />
+        <Oscilloscope active={poiActive} />
+      </Editable>
     </Hotspot>
   )
 }

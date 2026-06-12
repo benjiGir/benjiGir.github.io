@@ -5,6 +5,7 @@ import { Physics, RigidBody, type RapierRigidBody } from '@react-three/rapier'
 import { damp } from 'maath/easing'
 import * as THREE from 'three'
 import Hotspot from '@/scene/Hotspot'
+import Editable from '@/editor/Editable'
 import { useCameraStore } from '@/store/useCameraStore'
 import { useLegoStore } from '@/store/useLegoStore'
 import { playClick } from '@/lib/audio'
@@ -598,13 +599,14 @@ function PhysicsTower() {
           colliders="cuboid"
           restitution={0.15}
           friction={0.6}
-          onClick={handleTowerClick}
         >
           {/* Brique simple (sans tenons décoratifs : un mesh supplémentaire générerait un
-              collider "cuboid" additionnel par brique avec `colliders="cuboid"`) */}
+              collider "cuboid" additionnel par brique avec `colliders="cuboid"`). Le clic est
+              porté par le mesh (RigidBodyProps ne type pas onClick). */}
           <mesh
             castShadow
             receiveShadow
+            onClick={handleTowerClick}
             onPointerOver={() => (document.body.style.cursor = 'pointer')}
             onPointerOut={() => (document.body.style.cursor = 'auto')}
           >
@@ -650,9 +652,7 @@ function BuildPanel({ step, onReset }: BuildPanelProps) {
           boxShadow: '0 8px 24px rgba(0,0,0,0.35)',
         }}
       >
-        <div style={{ fontWeight: 600, marginBottom: 4, letterSpacing: 0.3 }}>
-          Maquette Lego
-        </div>
+        <div style={{ fontWeight: 600, marginBottom: 4, letterSpacing: 0.3 }}>Maquette Lego</div>
         <div style={{ opacity: 0.8, marginBottom: 8 }}>
           {done ? 'Voiture terminée !' : `Étape ${step} / ${CAR_TOTAL_STEPS}`}
         </div>
@@ -710,9 +710,11 @@ export default function LegoCorner() {
 
   return (
     <Hotspot poi="legos" label="Coin legos" position={[2.6, 0, 1.2]}>
-      <LowTable />
-      <BuildPlate active={poiActive} />
-      <ScatteredBricks />
+      <Editable id="legos" label="Coin legos">
+        <LowTable />
+        <BuildPlate active={poiActive} />
+        <ScatteredBricks />
+      </Editable>
       {poiActive && <BuildPanel step={step} onReset={handleReset} />}
       {visited && (
         <Physics>

@@ -1,4 +1,4 @@
- // Moteur audio — sons UI synthétisés via Web Audio API + lecture de fichiers en boucle pour l'ambiance.
+// Moteur audio — sons UI synthétisés via Web Audio API + lecture de fichiers en boucle pour l'ambiance.
 
 let ctx: AudioContext | null = null
 let master: GainNode | null = null

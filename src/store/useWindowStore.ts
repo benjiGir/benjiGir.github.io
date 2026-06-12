@@ -13,7 +13,10 @@ export type Win = {
 type WindowStore = {
   windows: Win[]
   _top: number
-  openWindow: (appId: string, meta: { title: string; defaultSize: { w: number; h: number } }) => void
+  openWindow: (
+    appId: string,
+    meta: { title: string; defaultSize: { w: number; h: number } }
+  ) => void
   closeWindow: (id: string) => void
   focusWindow: (id: string) => void
   moveWindow: (id: string, pos: { x: number; y: number }) => void
@@ -58,9 +61,7 @@ export const useWindowStore = create<WindowStore>((set, get) => ({
     const top = get()._top + 1
     set((s) => ({
       _top: top,
-      windows: s.windows.map((w) =>
-        w.id === id ? { ...w, zIndex: top, minimized: false } : w
-      ),
+      windows: s.windows.map((w) => (w.id === id ? { ...w, zIndex: top, minimized: false } : w)),
     }))
   },
 

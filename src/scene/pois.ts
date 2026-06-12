@@ -2,14 +2,7 @@
 // de `CameraControls.setLookAt`, ainsi que d'éventuelles contraintes de distance spécifiques
 // (ex. zoom serré sur l'écran). `CameraRig` consomme ce registre, `Hotspot` y référence ses POI.
 
-export type PoiId =
-  | 'overview'
-  | 'screen'
-  | 'guitar'
-  | 'workbench'
-  | 'crt'
-  | 'legos'
-  | 'robot'
+export type PoiId = 'overview' | 'screen' | 'guitar' | 'workbench' | 'crt' | 'legos' | 'robot'
 
 export interface PoiConfig {
   /** Position de la caméra. */

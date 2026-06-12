@@ -8,7 +8,7 @@ const EXPERIENCE = [
   {
     role: 'Développeur backend',
     company: 'Komity',
-    period: 'Septembre 2022 – aujourd\'hui',
+    period: "Septembre 2022 – aujourd'hui",
     description: '',
   },
   {
@@ -82,7 +82,10 @@ export default function AboutApp() {
       <Section title="Compétences">
         <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
           {SKILLS.map((group) => (
-            <div key={group.category} style={{ display: 'flex', gap: 16, alignItems: 'flex-start' }}>
+            <div
+              key={group.category}
+              style={{ display: 'flex', gap: 16, alignItems: 'flex-start' }}
+            >
               <div
                 style={{
                   width: 72,
@@ -121,11 +124,25 @@ export default function AboutApp() {
         <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
           {EXPERIENCE.map((exp, i) => (
             <div key={i}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: 3 }}>
+              <div
+                style={{
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  alignItems: 'baseline',
+                  marginBottom: 3,
+                }}
+              >
                 <div style={{ fontSize: 12, fontWeight: 600, color: 'rgba(255,255,255,0.8)' }}>
                   {exp.role}
                 </div>
-                <div style={{ fontSize: 10, color: 'rgba(255,255,255,0.25)', whiteSpace: 'nowrap', marginLeft: 12 }}>
+                <div
+                  style={{
+                    fontSize: 10,
+                    color: 'rgba(255,255,255,0.25)',
+                    whiteSpace: 'nowrap',
+                    marginLeft: 12,
+                  }}
+                >
                   {exp.period}
                 </div>
               </div>

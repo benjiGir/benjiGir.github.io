@@ -23,7 +23,9 @@ export default function FullscreenOverlay() {
   // Escape key to exit
   useEffect(() => {
     if (!isFullscreen) return
-    const handler = (e: KeyboardEvent) => { if (e.key === 'Escape') exit() }
+    const handler = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') exit()
+    }
     window.addEventListener('keydown', handler)
     return () => window.removeEventListener('keydown', handler)
   }, [isFullscreen, exit])

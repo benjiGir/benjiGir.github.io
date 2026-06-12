@@ -35,7 +35,16 @@ function CopyButton({ text }: { text: string }) {
 // Simple envelope SVG
 function IconMail() {
   return (
-    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.25)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+    <svg
+      width="32"
+      height="32"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="rgba(255,255,255,0.25)"
+      strokeWidth="1.5"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
       <rect x="2" y="4" width="20" height="16" rx="2" />
       <polyline points="2,4 12,13 22,4" />
     </svg>
@@ -60,10 +69,25 @@ export default function ContactApp() {
       <IconMail />
 
       <div style={{ textAlign: 'center' }}>
-        <div style={{ fontSize: 11, letterSpacing: 2, color: 'rgba(255,255,255,0.25)', marginBottom: 10, textTransform: 'uppercase' }}>
+        <div
+          style={{
+            fontSize: 11,
+            letterSpacing: 2,
+            color: 'rgba(255,255,255,0.25)',
+            marginBottom: 10,
+            textTransform: 'uppercase',
+          }}
+        >
           Email
         </div>
-        <div style={{ fontSize: 15, fontWeight: 500, color: 'rgba(255,255,255,0.85)', letterSpacing: 0.3 }}>
+        <div
+          style={{
+            fontSize: 15,
+            fontWeight: 500,
+            color: 'rgba(255,255,255,0.85)',
+            letterSpacing: 0.3,
+          }}
+        >
           {EMAIL}
         </div>
       </div>

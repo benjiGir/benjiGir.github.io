@@ -121,7 +121,14 @@ function ProjectRow({
         transition: 'background 0.1s',
       }}
     >
-      <div style={{ fontSize: 12, fontWeight: 600, color: selected ? '#fff' : 'rgba(255,255,255,0.7)', marginBottom: 2 }}>
+      <div
+        style={{
+          fontSize: 12,
+          fontWeight: 600,
+          color: selected ? '#fff' : 'rgba(255,255,255,0.7)',
+          marginBottom: 2,
+        }}
+      >
         {project.name}
       </div>
       <div style={{ fontSize: 10, color: 'rgba(255,255,255,0.35)', letterSpacing: 0.2 }}>

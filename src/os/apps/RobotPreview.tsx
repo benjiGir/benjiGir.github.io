@@ -10,11 +10,7 @@ const [GRID_CENTER_X, GRID_CENTER_Z] = cellToWorld((GRID_SIZE - 1) / 2, (GRID_SI
 const GRID_SPAN = (GRID_SIZE - 1) * CELL_SIZE + CELL_SIZE // marge d'une demi-cellule de chaque côté
 
 // Caméra fixe en vue 3/4 plongeante au-dessus de la grille (offset par rapport à son centre)
-const CAMERA_POS: [number, number, number] = [
-  GRID_CENTER_X + 0.5,
-  1.2,
-  GRID_CENTER_Z - 0.8,
-]
+const CAMERA_POS: [number, number, number] = [GRID_CENTER_X + 0.5, 1.2, GRID_CENTER_Z - 0.8]
 
 // ─── Tapis + grille visuelle ──────────────────────────────────────────────────
 
@@ -40,7 +36,11 @@ function MiniMat() {
 
   return (
     <group>
-      <mesh position={[GRID_CENTER_X, 0, GRID_CENTER_Z]} rotation={[-Math.PI / 2, 0, 0]} receiveShadow>
+      <mesh
+        position={[GRID_CENTER_X, 0, GRID_CENTER_Z]}
+        rotation={[-Math.PI / 2, 0, 0]}
+        receiveShadow
+      >
         <planeGeometry args={[GRID_SPAN + 0.1, GRID_SPAN + 0.1]} />
         <meshStandardMaterial color="#5b6b7a" roughness={0.95} />
       </mesh>

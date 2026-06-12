@@ -18,7 +18,16 @@ const PINNED_APPS = [
 
 function IconPower() {
   return (
-    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <svg
+      width="13"
+      height="13"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
       <path d="M12 2v8" />
       <path d="M18.36 6.64a9 9 0 1 1-12.73 0" />
     </svg>
@@ -27,7 +36,15 @@ function IconPower() {
 
 function IconExpand() {
   return (
-    <svg width="13" height="13" viewBox="0 0 13 13" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round">
+    <svg
+      width="13"
+      height="13"
+      viewBox="0 0 13 13"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.5"
+      strokeLinecap="round"
+    >
       <polyline points="1,5 1,1 5,1" />
       <polyline points="8,1 12,1 12,5" />
       <polyline points="12,8 12,12 8,12" />
@@ -36,7 +53,17 @@ function IconExpand() {
   )
 }
 
-function StartMenuApp({ id, label, bg, icon }: { id: string; label: string; bg: string; icon?: string }) {
+function StartMenuApp({
+  id,
+  label,
+  bg,
+  icon,
+}: {
+  id: string
+  label: string
+  bg: string
+  icon?: string
+}) {
   const openWindow = useWindowStore((s) => s.openWindow)
   const [hovered, setHovered] = useState(false)
 
@@ -85,10 +112,7 @@ export default function StartMenu({ onClose }: { onClose: () => void }) {
 
   return (
     <>
-      <div
-        onClick={onClose}
-        style={{ position: 'absolute', inset: 0, zIndex: 1990 }}
-      />
+      <div onClick={onClose} style={{ position: 'absolute', inset: 0, zIndex: 1990 }} />
       <div
         style={{
           position: 'absolute',
@@ -188,7 +212,10 @@ export default function StartMenu({ onClose }: { onClose: () => void }) {
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
             <button
-              onClick={() => { playClick(); toggle() }}
+              onClick={() => {
+                playClick()
+                toggle()
+              }}
               title={isFullscreen ? 'Quitter le plein écran' : 'Plein écran'}
               style={{
                 display: 'flex',
@@ -207,7 +234,11 @@ export default function StartMenu({ onClose }: { onClose: () => void }) {
               Plein écran
             </button>
             <button
-              onClick={() => { playClick(); shutdown(); onClose() }}
+              onClick={() => {
+                playClick()
+                shutdown()
+                onClose()
+              }}
               title="Arrêter l'ordinateur"
               style={{
                 display: 'flex',

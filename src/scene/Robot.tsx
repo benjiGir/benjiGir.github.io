@@ -37,8 +37,16 @@ export default function Robot() {
       tmpDir.set(pointer.x, pointer.y, 0.5).unproject(camera)
       model.head.getWorldPosition(tmpHeadPos)
       tmpDir.sub(tmpHeadPos)
-      targetYaw = THREE.MathUtils.clamp(Math.atan2(tmpDir.x, tmpDir.z), -HEAD_LOOK_LIMIT, HEAD_LOOK_LIMIT)
-      targetPitch = THREE.MathUtils.clamp(-tmpDir.y * 0.4, -HEAD_LOOK_LIMIT * 0.6, HEAD_LOOK_LIMIT * 0.6)
+      targetYaw = THREE.MathUtils.clamp(
+        Math.atan2(tmpDir.x, tmpDir.z),
+        -HEAD_LOOK_LIMIT,
+        HEAD_LOOK_LIMIT
+      )
+      targetPitch = THREE.MathUtils.clamp(
+        -tmpDir.y * 0.4,
+        -HEAD_LOOK_LIMIT * 0.6,
+        HEAD_LOOK_LIMIT * 0.6
+      )
     }
 
     model.gaze.current.yaw = targetYaw

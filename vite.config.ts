@@ -1,9 +1,10 @@
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 import { resolve } from 'path'
+import { sceneEditorPlugin } from './vite-plugin-scene-editor'
 
 export default defineConfig({
-  plugins: [react()],
+  plugins: [react(), sceneEditorPlugin()],
   resolve: {
     alias: {
       '@': resolve(__dirname, 'src'),

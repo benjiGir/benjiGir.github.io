@@ -30,8 +30,11 @@ export const projects: Project[] = [
       'entre les différentes équipes que ce soit via un lien de consultation ou le téléchargement de l`archive complète. ' +
       'L`application est composée d`une interface web pour la gestion des archives et d`une API REST pour les opérations de backend.',
     stack: ['TypeScript', 'React', 'NestJS', 'PostgreSQL', 'Docker'],
-    links: [{ label: 'Repository front', url: 'https://github.com/benjiGir/re-astr-front' },{ label: 'Repository back', url: 'https://github.com/benjiGir/re-astr-back' }],
+    links: [
+      { label: 'Repository front', url: 'https://github.com/benjiGir/re-astr-front' },
+      { label: 'Repository back', url: 'https://github.com/benjiGir/re-astr-back' },
+    ],
     color: '#8b5cf6',
     year: 2024,
-  }
+  },
 ]

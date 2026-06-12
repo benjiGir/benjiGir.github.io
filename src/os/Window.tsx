@@ -48,7 +48,7 @@ export default function Window({ id, appId, title, position, size, zIndex }: Win
         '[data-desktop]'
       ) as HTMLElement | null
       const rect = desktopEl?.getBoundingClientRect()
-      const scale = rect ? (desktopEl!.offsetWidth / rect.width) : 1
+      const scale = rect ? desktopEl!.offsetWidth / rect.width : 1
 
       const startX = e.clientX
       const startY = e.clientY
@@ -107,8 +107,22 @@ export default function Window({ id, appId, title, position, size, zIndex }: Win
   return (
     <div style={root} onMouseDown={() => focusWindow(id)}>
       <div style={titleBar} onMouseDown={onTitleBarDrag}>
-        <TrafficButton color="#ff5f57" onClick={(e) => { e.stopPropagation(); playClick(); closeWindow(id) }} />
-        <TrafficButton color="#febc2e" onClick={(e) => { e.stopPropagation(); playClick(); minimizeWindow(id) }} />
+        <TrafficButton
+          color="#ff5f57"
+          onClick={(e) => {
+            e.stopPropagation()
+            playClick()
+            closeWindow(id)
+          }}
+        />
+        <TrafficButton
+          color="#febc2e"
+          onClick={(e) => {
+            e.stopPropagation()
+            playClick()
+            minimizeWindow(id)
+          }}
+        />
         <TrafficButton color="#28c840" onClick={(e) => e.stopPropagation()} />
         <span
           style={{
@@ -127,11 +141,23 @@ export default function Window({ id, appId, title, position, size, zIndex }: Win
       </div>
 
       <div style={{ flex: 1, overflow: 'auto', position: 'relative' }}>
-        <Suspense fallback={
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%', fontSize: 11, color: 'rgba(255,255,255,0.2)', letterSpacing: 2 }}>
-            CHARGEMENT
-          </div>
-        }>
+        <Suspense
+          fallback={
+            <div
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                height: '100%',
+                fontSize: 11,
+                color: 'rgba(255,255,255,0.2)',
+                letterSpacing: 2,
+              }}
+            >
+              CHARGEMENT
+            </div>
+          }
+        >
           {App && <App />}
         </Suspense>
       </div>

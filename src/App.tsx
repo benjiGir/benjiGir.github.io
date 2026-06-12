@@ -8,6 +8,10 @@ import AudioUnlock from '@/components/AudioUnlock'
 import MuteToggle from '@/components/MuteToggle'
 import FullscreenOverlay from '@/os/FullscreenOverlay'
 import ScreenPortal from '@/os/ScreenPortal'
+import EditorPanel from '@/editor/EditorPanel'
+
+// @ts-ignore
+const DEBUG = import.meta.env.VITE_DEBUG === 'true'
 
 export default function App() {
   return (
@@ -29,6 +33,7 @@ export default function App() {
       <MobileWarning />
       <AudioUnlock />
       <MuteToggle />
+      {DEBUG && <EditorPanel />}
     </>
   )
 }

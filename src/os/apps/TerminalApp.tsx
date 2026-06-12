@@ -7,9 +7,7 @@ import { playClick } from '@/lib/audio'
 // ── Types ──────────────────────────────────────────────────────────────────────
 
 type Span = { text: string; color?: string; bold?: boolean }
-type Line =
-  | { kind: 'output'; spans: Span[] }
-  | { kind: 'input'; text: string; cwd: string }
+type Line = { kind: 'output'; spans: Span[] } | { kind: 'input'; text: string; cwd: string }
 
 // ── Virtual Filesystem ─────────────────────────────────────────────────────────
 
@@ -23,8 +21,12 @@ const d = (children: Record<string, FSNode>): DirNode => ({ kind: 'dir', childre
 const FS: DirNode = d({
   home: d({
     benji: d({
-      '.profile': f('# ~/.profile\nexport USER=benji\nexport HOME=/home/benji\nexport PATH=/usr/local/bin:/usr/bin'),
-      'readme.txt': f('Bienvenue dans le terminal de Benjamin Girard.\nTape "help" pour la liste des commandes.'),
+      '.profile': f(
+        '# ~/.profile\nexport USER=benji\nexport HOME=/home/benji\nexport PATH=/usr/local/bin:/usr/bin'
+      ),
+      'readme.txt': f(
+        'Bienvenue dans le terminal de Benjamin Girard.\nTape "help" pour la liste des commandes.'
+      ),
       projets: d({
         'portfolio-3d': d({
           'README.md': f(
@@ -48,7 +50,9 @@ const FS: DirNode = d({
       }),
       documents: d({
         'cv.pdf': f('[Fichier binaire — ne peut pas être affiché]'),
-        'notes.txt': f('TODO:\n- [ ] Finir le portfolio 3D\n- [ ] Ajouter plus de projets\n- [x] Créer le terminal amélioré\n- [x] Créer l\'éditeur de code'),
+        'notes.txt': f(
+          "TODO:\n- [ ] Finir le portfolio 3D\n- [ ] Ajouter plus de projets\n- [x] Créer le terminal amélioré\n- [x] Créer l'éditeur de code"
+        ),
       }),
     }),
   }),
@@ -145,16 +149,31 @@ const LOGO = [
 
 const BANNER: Line[] = [
   { kind: 'output', spans: [{ text: 'Bureau OS v1.0.0', color: C.cyan }] },
-  { kind: 'output', spans: [{ text: 'Tape "help" pour voir les commandes disponibles.', color: C.muted }] },
+  {
+    kind: 'output',
+    spans: [{ text: 'Tape "help" pour voir les commandes disponibles.', color: C.muted }],
+  },
   { kind: 'output', spans: [{ text: '' }] },
 ]
 
 // ── Commands ───────────────────────────────────────────────────────────────────
 
 const COMMANDS = [
-  'help', 'whoami', 'pwd', 'ls', 'cd', 'cat', 'echo',
-  'date', 'clear', 'history', 'projects', 'contact',
-  'open', 'neofetch', 'man',
+  'help',
+  'whoami',
+  'pwd',
+  'ls',
+  'cd',
+  'cat',
+  'echo',
+  'date',
+  'clear',
+  'history',
+  'projects',
+  'contact',
+  'open',
+  'neofetch',
+  'man',
 ]
 
 type CmdCtx = {
@@ -164,9 +183,15 @@ type CmdCtx = {
   openApp: (id: string) => void
 }
 
-function o(spans: Span[]): Line { return { kind: 'output', spans } }
-function spans(...ss: Span[]): Span[] { return ss }
-function s(text: string, color?: string, bold?: boolean): Span { return { text, color, bold } }
+function o(spans: Span[]): Line {
+  return { kind: 'output', spans }
+}
+function spans(...ss: Span[]): Span[] {
+  return ss
+}
+function s(text: string, color?: string, bold?: boolean): Span {
+  return { text, color, bold }
+}
 
 function runCommand(raw: string, ctx: CmdCtx): Line[] | null {
   const trimmed = raw.trim()
@@ -245,10 +270,12 @@ function runCommand(raw: string, ctx: CmdCtx): Line[] | null {
           const isDir = child.kind === 'dir'
           const perm = isDir ? 'drwxr-xr-x' : '-rw-r--r--'
           const size = child.kind === 'file' ? String(child.content.length).padStart(6) : '  4096'
-          return o(spans(
-            s(`${perm}  benji  benji  ${size}  `, C.muted),
-            s(name + (isDir ? '/' : ''), fileColor(name, isDir)),
-          ))
+          return o(
+            spans(
+              s(`${perm}  benji  benji  ${size}  `, C.muted),
+              s(name + (isDir ? '/' : ''), fileColor(name, isDir))
+            )
+          )
         })
       }
 
@@ -256,10 +283,14 @@ function runCommand(raw: string, ctx: CmdCtx): Line[] | null {
       const lines: Line[] = []
       for (let i = 0; i < entries.length; i += cols) {
         const row = entries.slice(i, i + cols)
-        lines.push(o(row.flatMap(([name, child]) => {
-          const isDir = child.kind === 'dir'
-          return [s((name + (isDir ? '/' : '')).padEnd(22), fileColor(name, isDir))]
-        })))
+        lines.push(
+          o(
+            row.flatMap(([name, child]) => {
+              const isDir = child.kind === 'dir'
+              return [s((name + (isDir ? '/' : '')).padEnd(22), fileColor(name, isDir))]
+            })
+          )
+        )
       }
       return lines
     }
@@ -270,7 +301,8 @@ function runCommand(raw: string, ctx: CmdCtx): Line[] | null {
       const resolved = resolvePath(ctx.cwd, target)
       const node = getNode(resolved)
       if (!node) return [o(spans(s(`cd: ${target}: Aucun fichier ou dossier de ce type`, C.red)))]
-      if (node.kind === 'file') return [o(spans(s(`cd: ${target}: N'est pas un répertoire`, C.red)))]
+      if (node.kind === 'file')
+        return [o(spans(s(`cd: ${target}: N'est pas un répertoire`, C.red)))]
       ctx.setCwd(resolved)
       return []
     }
@@ -298,7 +330,11 @@ function runCommand(raw: string, ctx: CmdCtx): Line[] | null {
     // ── date ──────────────────────────────────────────────────────────────────
     case 'date': {
       const now = new Date()
-      return [o(spans(s(now.toLocaleString('fr-FR', { dateStyle: 'full', timeStyle: 'medium' }), C.cyan)))]
+      return [
+        o(
+          spans(s(now.toLocaleString('fr-FR', { dateStyle: 'full', timeStyle: 'medium' }), C.cyan))
+        ),
+      ]
     }
 
     // ── clear ─────────────────────────────────────────────────────────────────
@@ -311,7 +347,9 @@ function runCommand(raw: string, ctx: CmdCtx): Line[] | null {
       return ctx.history
         .slice()
         .reverse()
-        .map((cmd, i) => o(spans(s(`  ${String(ctx.history.length - i).padStart(4)}  `, C.muted), s(cmd))))
+        .map((cmd, i) =>
+          o(spans(s(`  ${String(ctx.history.length - i).padStart(4)}  `, C.muted), s(cmd)))
+        )
 
     // ── projects ──────────────────────────────────────────────────────────────
     case 'projects':
@@ -368,7 +406,9 @@ function runCommand(raw: string, ctx: CmdCtx): Line[] | null {
 
     // ── neofetch ──────────────────────────────────────────────────────────────
     case 'neofetch': {
-      const mem = (performance as unknown as { memory?: { usedJSHeapSize: number; totalJSHeapSize: number } }).memory
+      const mem = (
+        performance as unknown as { memory?: { usedJSHeapSize: number; totalJSHeapSize: number } }
+      ).memory
       const memStr = mem
         ? `${Math.round(mem.usedJSHeapSize / 1024 / 1024)} MiB / ${Math.round(mem.totalJSHeapSize / 1024 / 1024)} MiB`
         : 'N/A'
@@ -385,9 +425,9 @@ function runCommand(raw: string, ctx: CmdCtx): Line[] | null {
         [],
         spans(
           s('  '),
-          ...([C.red, C.yellow, C.green, C.cyan, C.blue, C.mauve, C.white, C.muted] as string[]).flatMap((c) => [
-            s('██', c),
-          ])
+          ...(
+            [C.red, C.yellow, C.green, C.cyan, C.blue, C.mauve, C.white, C.muted] as string[]
+          ).flatMap((c) => [s('██', c)])
         ),
       ]
 
@@ -446,7 +486,9 @@ function runCommand(raw: string, ctx: CmdCtx): Line[] | null {
           o(spans(s(''))),
           o(
             spans(
-              s('    Apps : projects, about, contact, terminal, explorer, editor, robotlab, circuitlab')
+              s(
+                '    Apps : projects, about, contact, terminal, explorer, editor, robotlab, circuitlab'
+              )
             )
           ),
           o(spans(s(''))),
@@ -532,10 +574,15 @@ export default function TerminalApp() {
     const result = runCommand(cmd, {
       cwd,
       history,
-      setCwd: (p) => { newCwd = p },
+      setCwd: (p) => {
+        newCwd = p
+      },
       openApp: (id) => {
         const meta = APP_REGISTRY[id]
-        if (meta) { playClick(); openWindow(id, meta) }
+        if (meta) {
+          playClick()
+          openWindow(id, meta)
+        }
       },
     })
 
@@ -635,7 +682,15 @@ export default function TerminalApp() {
           )
         }
         return (
-          <div key={i} style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'baseline', minHeight: '1.7em' }}>
+          <div
+            key={i}
+            style={{
+              display: 'flex',
+              flexWrap: 'wrap',
+              alignItems: 'baseline',
+              minHeight: '1.7em',
+            }}
+          >
             {line.spans.map((span, j) => (
               <span
                 key={j}
@@ -686,7 +741,9 @@ function Prompt({ cwd }: { cwd: string }) {
       <span style={{ color: C.blue, userSelect: 'none', whiteSpace: 'pre' }}>bureau</span>
       <span style={{ color: C.muted, userSelect: 'none', whiteSpace: 'pre' }}>:</span>
       <span style={{ color: C.cyan, userSelect: 'none', whiteSpace: 'pre' }}>{cwd}</span>
-      <span style={{ color: C.white, userSelect: 'none', whiteSpace: 'pre', marginRight: 8 }}>$</span>
+      <span style={{ color: C.white, userSelect: 'none', whiteSpace: 'pre', marginRight: 8 }}>
+        $
+      </span>
     </>
   )
 }

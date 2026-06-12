@@ -92,7 +92,7 @@ export default function RobotLabApp() {
       push({
         icon: '⚠️',
         title: 'Échec',
-        body: 'Le robot est sorti du tapis ou n\'a pas atteint la cible. Réessaie !',
+        body: "Le robot est sorti du tapis ou n'a pas atteint la cible. Réessaie !",
       })
     } else if (runState === 'idle' || runState === 'running') {
       lastResultRef.current = null
@@ -167,10 +167,7 @@ export default function RobotLabApp() {
               flexShrink: 0,
               padding: '6px 12px',
               borderRadius: 6,
-              border:
-                i === levelIndex
-                  ? '1px solid #3b82f6'
-                  : '1px solid rgba(255,255,255,0.08)',
+              border: i === levelIndex ? '1px solid #3b82f6' : '1px solid rgba(255,255,255,0.08)',
               background: i === levelIndex ? 'rgba(59,130,246,0.18)' : 'rgba(255,255,255,0.04)',
               color: i === levelIndex ? '#fff' : 'rgba(255,255,255,0.5)',
               fontSize: 11,
@@ -256,7 +253,9 @@ export default function RobotLabApp() {
         </div>
 
         {/* Séquence */}
-        <div style={{ flex: 1, padding: 14, display: 'flex', flexDirection: 'column', minWidth: 0 }}>
+        <div
+          style={{ flex: 1, padding: 14, display: 'flex', flexDirection: 'column', minWidth: 0 }}
+        >
           <div
             style={{
               fontSize: 10,
@@ -309,7 +308,9 @@ export default function RobotLabApp() {
                   <span style={{ fontSize: 10, color: 'rgba(255,255,255,0.3)', width: 18 }}>
                     {i + 1}
                   </span>
-                  <span style={{ fontSize: 14, color: block.color, width: 18, textAlign: 'center' }}>
+                  <span
+                    style={{ fontSize: 14, color: block.color, width: 18, textAlign: 'center' }}
+                  >
                     {block.icon}
                   </span>
                   <span style={{ fontSize: 12, flex: 1 }}>{block.label}</span>

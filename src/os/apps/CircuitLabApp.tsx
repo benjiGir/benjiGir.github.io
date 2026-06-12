@@ -82,7 +82,8 @@ const LEVELS: Level[] = [
   {
     id: 4,
     title: 'Niveau 5 — Combinaison',
-    description: 'A ET B passent par AND, puis le résultat est inversé (NOT) avant la LED — un NAND !',
+    description:
+      'A ET B passent par AND, puis le résultat est inversé (NOT) avant la LED — un NAND !',
     ports: [
       { id: 'in0', label: 'A', kind: 'input', col: 0, row: 0 },
       { id: 'in1', label: 'B', kind: 'input', col: 0, row: 2 },
@@ -468,8 +469,7 @@ export default function CircuitLabApp() {
               fill = 'rgba(96,165,250,0.14)'
               stroke = '#60a5fa'
             } else if (port.kind === 'output') {
-              fill =
-                feedback === 'success' ? 'rgba(52,211,153,0.28)' : 'rgba(248,113,113,0.14)'
+              fill = feedback === 'success' ? 'rgba(52,211,153,0.28)' : 'rgba(248,113,113,0.14)'
               stroke = feedback === 'success' ? '#34d399' : '#f87171'
             } else if (port.gate) {
               fill = `${GATE_COLORS[port.gate]}22`
@@ -481,7 +481,9 @@ export default function CircuitLabApp() {
               <g
                 key={port.id}
                 onClick={() => handlePortClick(port.id)}
-                style={{ cursor: port.kind === 'output' && pending === null ? 'default' : 'pointer' }}
+                style={{
+                  cursor: port.kind === 'output' && pending === null ? 'default' : 'pointer',
+                }}
               >
                 <rect
                   x={x}

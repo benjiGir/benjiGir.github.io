@@ -4,6 +4,7 @@ import { Html } from '@react-three/drei'
 import { Geometry, Base, Addition, Subtraction } from '@react-three/csg'
 import * as THREE from 'three'
 import Hotspot from '@/scene/Hotspot'
+import Editable from '@/editor/Editable'
 import { useCameraStore } from '@/store/useCameraStore'
 import { playPluck, playClick } from '@/lib/audio'
 
@@ -423,9 +424,7 @@ function SimonPanel({ stringTriggerRef }: { stringTriggerRef: MutableRefObject<n
           boxShadow: '0 8px 24px rgba(0,0,0,0.35)',
         }}
       >
-        <div style={{ fontWeight: 600, marginBottom: 6, letterSpacing: 0.3 }}>
-          Simon musical
-        </div>
+        <div style={{ fontWeight: 600, marginBottom: 6, letterSpacing: 0.3 }}>Simon musical</div>
         <div style={{ opacity: 0.75, marginBottom: 8, fontSize: 11, lineHeight: 1.4 }}>
           {state === 'idle' && 'Mémorise puis rejoue la séquence en cliquant les cordes.'}
           {state === 'showing' && 'Écoute…'}
@@ -472,8 +471,7 @@ function SimonPanel({ stringTriggerRef }: { stringTriggerRef: MutableRefObject<n
                 flex: 1,
                 height: 5,
                 borderRadius: 3,
-                background:
-                  activeIndex === i ? 'rgba(255,216,107,0.9)' : 'rgba(255,255,255,0.12)',
+                background: activeIndex === i ? 'rgba(255,216,107,0.9)' : 'rgba(255,255,255,0.12)',
                 transition: 'background 120ms',
               }}
             />
@@ -501,10 +499,10 @@ export default function Guitar() {
 
   return (
     <Hotspot poi="guitar" label="Guitare" position={[-3.85, 0, 2.35]}>
-      <group rotation={[0, Math.PI / 2, 0]}>
+      <Editable id="guitar" label="Guitare" rotation={[0, Math.PI / 2, 0]}>
         <GuitarModel stringTriggerRef={stringTriggerRef} interactive={poiActive} />
         {poiActive && <SimonPanel stringTriggerRef={stringTriggerRef} />}
-      </group>
+      </Editable>
     </Hotspot>
   )
 }

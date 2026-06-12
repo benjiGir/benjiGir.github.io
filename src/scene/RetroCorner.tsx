@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef, useState, type MutableRefObject } from 'rea
 import { useFrame, type ThreeEvent } from '@react-three/fiber'
 import * as THREE from 'three'
 import Hotspot from '@/scene/Hotspot'
+import Editable from '@/editor/Editable'
 import { useCameraStore } from '@/store/useCameraStore'
 import { playClick, playCrtOn } from '@/lib/audio'
 import { createPong } from '@/lib/games/pong'
@@ -415,10 +416,10 @@ export default function RetroCorner() {
 
   return (
     <Hotspot poi="crt" label="Coin jeu" position={[-2.4, 0, -3.6]}>
-      <group rotation={[0, -0.5, 0]}>
+      <Editable id="crt" label="Coin jeu (CRT)" rotation={[0, -0.5, 0]}>
         <Cabinet />
         <Tv texture={texture} on={on} onCartridgeClick={handleCartridgeClick} />
-      </group>
+      </Editable>
     </Hotspot>
   )
 }

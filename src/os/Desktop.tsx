@@ -21,7 +21,15 @@ const DESKTOP_ICONS = [
 // SVG icons for fullscreen toggle
 function IconExpand() {
   return (
-    <svg width="13" height="13" viewBox="0 0 13 13" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round">
+    <svg
+      width="13"
+      height="13"
+      viewBox="0 0 13 13"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.5"
+      strokeLinecap="round"
+    >
       <polyline points="1,5 1,1 5,1" />
       <polyline points="8,1 12,1 12,5" />
       <polyline points="12,8 12,12 8,12" />
@@ -32,7 +40,15 @@ function IconExpand() {
 
 function IconCollapse() {
   return (
-    <svg width="13" height="13" viewBox="0 0 13 13" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round">
+    <svg
+      width="13"
+      height="13"
+      viewBox="0 0 13 13"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.5"
+      strokeLinecap="round"
+    >
       <polyline points="1,4 4,4 4,1" />
       <polyline points="9,1 9,4 12,4" />
       <polyline points="12,9 9,9 9,12" />
@@ -77,7 +93,10 @@ function Topbar() {
           {time.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })}
         </span>
         <button
-          onClick={() => { playClick(); toggle() }}
+          onClick={() => {
+            playClick()
+            toggle()
+          }}
           title={isFullscreen ? 'Quitter le plein écran (Échap)' : 'Plein écran'}
           style={{
             background: 'none',
@@ -100,7 +119,17 @@ function Topbar() {
 
 // ─── Desktop icon ─────────────────────────────────────────────────────────────
 
-function DesktopIcon({ appId, label, bg, icon }: { appId: string; label: string; bg: string; icon?: string }) {
+function DesktopIcon({
+  appId,
+  label,
+  bg,
+  icon,
+}: {
+  appId: string
+  label: string
+  bg: string
+  icon?: string
+}) {
   const openWindow = useWindowStore((s) => s.openWindow)
   const [selected, setSelected] = useState(false)
 
@@ -175,7 +204,13 @@ function DesktopArea() {
         }}
       >
         {DESKTOP_ICONS.map((item) => (
-          <DesktopIcon key={item.id} appId={item.id} label={item.label} bg={item.bg} icon={item.icon} />
+          <DesktopIcon
+            key={item.id}
+            appId={item.id}
+            label={item.label}
+            bg={item.bg}
+            icon={item.icon}
+          />
         ))}
       </div>
 
@@ -221,7 +256,17 @@ function StartButton({ active, onClick }: { active: boolean; onClick: () => void
   )
 }
 
-function TaskbarWindow({ id, appId, title, minimized }: { id: string; appId: string; title: string; minimized: boolean }) {
+function TaskbarWindow({
+  id,
+  appId,
+  title,
+  minimized,
+}: {
+  id: string
+  appId: string
+  title: string
+  minimized: boolean
+}) {
   const { focusWindow, minimizeWindow } = useWindowStore()
   const meta = APP_REGISTRY[appId]
   const bg = meta?.color ?? '#475569'
@@ -253,7 +298,12 @@ function TaskbarWindow({ id, appId, title, minimized }: { id: string; appId: str
       }}
     >
       {icon ? (
-        <img src={icon} alt="" draggable={false} style={{ width: 18, height: 18, objectFit: 'contain', flexShrink: 0 }} />
+        <img
+          src={icon}
+          alt=""
+          draggable={false}
+          style={{ width: 18, height: 18, objectFit: 'contain', flexShrink: 0 }}
+        />
       ) : (
         <span
           style={{
@@ -279,7 +329,9 @@ function Clock() {
   }, [])
 
   return (
-    <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.7)', textAlign: 'right', lineHeight: 1.3 }}>
+    <div
+      style={{ fontSize: 12, color: 'rgba(255,255,255,0.7)', textAlign: 'right', lineHeight: 1.3 }}
+    >
       <div>{time.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })}</div>
       <div style={{ fontSize: 10, color: 'rgba(255,255,255,0.4)' }}>
         {time.toLocaleDateString('fr-FR', { day: '2-digit', month: '2-digit', year: 'numeric' })}
@@ -310,11 +362,23 @@ function Taskbar() {
           zIndex: 1000,
         }}
       >
-        <StartButton active={startOpen} onClick={() => { playClick(); setStartOpen((v) => !v) }} />
+        <StartButton
+          active={startOpen}
+          onClick={() => {
+            playClick()
+            setStartOpen((v) => !v)
+          }}
+        />
 
         <div style={{ display: 'flex', alignItems: 'center', gap: 6, flex: 1, overflowX: 'auto' }}>
           {windows.map((win) => (
-            <TaskbarWindow key={win.id} id={win.id} appId={win.appId} title={win.title} minimized={win.minimized} />
+            <TaskbarWindow
+              key={win.id}
+              id={win.id}
+              appId={win.appId}
+              title={win.title}
+              minimized={win.minimized}
+            />
           ))}
         </div>
 
@@ -335,8 +399,7 @@ export default function Desktop() {
         width: SCREEN_W,
         height: SCREEN_H,
         overflow: 'hidden',
-        fontFamily:
-          "-apple-system, BlinkMacSystemFont, 'Segoe UI', 'Helvetica Neue', sans-serif",
+        fontFamily: "-apple-system, BlinkMacSystemFont, 'Segoe UI', 'Helvetica Neue', sans-serif",
         fontSize: 13,
         lineHeight: 1.4,
         color: '#e2e8f0',
@@ -344,8 +407,7 @@ export default function Desktop() {
         position: 'relative',
         display: 'flex',
         flexDirection: 'column',
-        background:
-          'radial-gradient(ellipse at 30% 20%, #1a2a4a 0%, #0d1525 40%, #080d18 100%)',
+        background: 'radial-gradient(ellipse at 30% 20%, #1a2a4a 0%, #0d1525 40%, #080d18 100%)',
       }}
     >
       <Topbar />

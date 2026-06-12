@@ -19,19 +19,19 @@ const ENTRIES: Entry[] = [
       'Bienvenue dans ce bureau virtuel.',
       '',
       'Tout ici est cliquable, double-cliquable et un peu trop',
-      'inspiré des systèmes d\'exploitation des années 2000.',
+      "inspiré des systèmes d'exploitation des années 2000.",
       '',
-      'Astuce : la corbeille n\'est pas vide.',
+      "Astuce : la corbeille n'est pas vide.",
     ],
   },
   {
     type: 'file',
     name: 'ne_pas_ouvrir.txt',
     content: [
-      'Vous avez ouvert le fichier qu\'il ne fallait pas ouvrir.',
+      "Vous avez ouvert le fichier qu'il ne fallait pas ouvrir.",
       '',
       'Rassurez-vous, il ne contient que ce message.',
-      'Rien ne s\'est passé. Tout va bien.',
+      "Rien ne s'est passé. Tout va bien.",
       '',
       '...probablement.',
     ],
@@ -41,14 +41,25 @@ const ENTRIES: Entry[] = [
 function IconFolder({ color }: { color: string }) {
   return (
     <svg width="34" height="34" viewBox="0 0 24 24" fill={color}>
-      <path d="M3 5a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5z" opacity="0.85" />
+      <path
+        d="M3 5a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5z"
+        opacity="0.85"
+      />
     </svg>
   )
 }
 
 function IconFile() {
   return (
-    <svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.4)" strokeWidth="1.5" strokeLinejoin="round">
+    <svg
+      width="34"
+      height="34"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="rgba(255,255,255,0.4)"
+      strokeWidth="1.5"
+      strokeLinejoin="round"
+    >
       <path d="M6 2h8l4 4v14a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1V3a1 1 0 0 1 1-1z" />
       <path d="M14 2v4h4" />
     </svg>
@@ -74,7 +85,15 @@ export default function FileExplorerApp() {
   }
 
   return (
-    <div style={{ height: '100%', position: 'relative', display: 'flex', flexDirection: 'column', background: '#0d1525' }}>
+    <div
+      style={{
+        height: '100%',
+        position: 'relative',
+        display: 'flex',
+        flexDirection: 'column',
+        background: '#0d1525',
+      }}
+    >
       <div
         style={{
           padding: '10px 16px',
@@ -178,7 +197,14 @@ export default function FileExplorerApp() {
                 ✕
               </button>
             </div>
-            <div style={{ padding: '14px 16px', fontSize: 12, lineHeight: 1.7, color: 'rgba(255,255,255,0.6)' }}>
+            <div
+              style={{
+                padding: '14px 16px',
+                fontSize: 12,
+                lineHeight: 1.7,
+                color: 'rgba(255,255,255,0.6)',
+              }}
+            >
               {openFile.content.map((line, i) => (
                 <div key={i}>{line || ' '}</div>
               ))}
