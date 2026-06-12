@@ -12,6 +12,8 @@ const PINNED_APPS = [
   { id: 'contact', label: 'Contact', bg: '#10b981', icon: '/icons/contact.png' },
   { id: 'terminal', label: 'Terminal', bg: '#334155', icon: '/icons/terminal.png' },
   { id: 'editor', label: 'Éditeur', bg: '#7c3aed', icon: '/icons/editor.png' },
+  { id: 'robotlab', label: 'Robot Lab', bg: '#fff', icon: '/icons/robot.png' },
+  { id: 'circuitlab', label: 'Circuit Lab', bg: '#f59e0b', icon: '/icons/oscillograph.png' },
 ]
 
 function IconPower() {

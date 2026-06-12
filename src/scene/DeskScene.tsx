@@ -8,6 +8,11 @@ import { useDeskStore } from '@/store/useDeskStore'
 import { useScreenStore } from '@/store/useScreenStore'
 import { playClick } from '@/lib/audio'
 import Hotspot from '@/scene/Hotspot'
+import Robot from '@/scene/Robot'
+import Guitar from '@/scene/Guitar'
+import Workbench from '@/scene/Workbench'
+import RetroCorner from '@/scene/RetroCorner'
+import LegoCorner from '@/scene/LegoCorner'
 
 // ─── Floor ────────────────────────────────────────────────────────────────────
 
@@ -441,11 +446,11 @@ function Room() {
         <meshStandardMaterial color={baseboardColor} roughness={0.8} metalness={0} />
       </mesh>
 
-      {/* ── Tapis sous le bureau ── */}
-      {/* Légèrement surélevé (Y=0.005) pour éviter le z-fighting avec le sol */}
-      <mesh position={[0, 0.005, 0.2]} receiveShadow>
-        <boxGeometry args={[2.2, 0.01, 1.8]} />
-        <meshStandardMaterial color="#8b7355" roughness={0.95} metalness={0} />
+      {/* ── Tapis du robot — zone dégagée à droite, grille 6×6 (voir useRobotStore) ── */}
+      {/* Décalé sur X pour ne plus être dans l'axe caméra↔bureau (x=0) */}
+      <mesh position={[0.6, 0.005, 2.6]} receiveShadow>
+        <boxGeometry args={[1.6, 0.01, 1.6]} />
+        <meshStandardMaterial color="#5b6b7a" roughness={0.95} metalness={0} />
       </mesh>
 
       {/* ── Étagère murale sur le mur gauche ── */}
@@ -569,15 +574,8 @@ function Room() {
       </mesh>
 
       {/* ── Zones réservées (phase 1 : espace vide, mobilier ajouté en phases ultérieures) ── */}
-      {/* Coin jeu — mur du fond gauche : meuble bas + TV CRT + console (phase 5) */}
-      {/* Réservé autour de x≈-2.4, z≈-3.6 */}
-      {/* Coin atelier — mur du fond droit : établi électronique + oscilloscope (phase 4) */}
-      {/* Réservé autour de x≈2.4, z≈-3.6 */}
-      {/* Coin musique — mur gauche, près de la fenêtre : guitare sur stand (phase 3) */}
-      {/* Réservé autour de x≈-3.5, z≈2 */}
-      {/* Coin legos — premier plan droit : table basse + briques (phase 6) */}
-      {/* Réservé autour de x≈2.6, z≈1.2 */}
-      {/* Tapis sous le bureau — parcours du robot (phase 2) */}
+      {/* Coin atelier — mur du fond droit : établi électronique + oscilloscope, voir <Workbench /> */}
+      {/* Coin musique — mur gauche, juste après la fenêtre : guitare sur stand, voir <Guitar /> */}
     </group>
   )
 }
@@ -589,9 +587,22 @@ export default function DeskScene() {
     <group>
       <Floor />
       <Room />
-      <DeskFrame />
-      <SitStandPanel />
-      <DeskLiftGroup />
+      {/* Bureau reculé contre le mur du fond (z=-4) — coordonnées internes inchangées */}
+      <group position={[0, 0, -1.3]}>
+        {/* Tapis sous le bureau, suit le décalage du groupe */}
+        <mesh position={[0, 0.005, 0.2]} receiveShadow>
+          <boxGeometry args={[2.2, 0.01, 1.8]} />
+          <meshStandardMaterial color="#8b7355" roughness={0.95} metalness={0} />
+        </mesh>
+        <DeskFrame />
+        <SitStandPanel />
+        <DeskLiftGroup />
+      </group>
+      <Robot />
+      <Guitar />
+      <Workbench />
+      <RetroCorner />
+      <LegoCorner />
     </group>
   )
 }

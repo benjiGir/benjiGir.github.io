@@ -340,13 +340,27 @@ function runCommand(raw: string, ctx: CmdCtx): Line[] | null {
       if (!appId)
         return [
           o(spans(s('Usage: open <app>', C.red))),
-          o(spans(s('Apps : projects, about, contact, terminal, explorer, editor', C.muted))),
+          o(
+            spans(
+              s(
+                'Apps : projects, about, contact, terminal, explorer, editor, robotlab, circuitlab',
+                C.muted
+              )
+            )
+          ),
         ]
       const meta = APP_REGISTRY[appId]
       if (!meta)
         return [
           o(spans(s(`open: ${appId}: application introuvable`, C.red))),
-          o(spans(s('Apps : projects, about, contact, terminal, explorer, editor', C.muted))),
+          o(
+            spans(
+              s(
+                'Apps : projects, about, contact, terminal, explorer, editor, robotlab, circuitlab',
+                C.muted
+              )
+            )
+          ),
         ]
       ctx.openApp(appId)
       return [o(spans(s(`Ouverture de "${meta.title}"…`, C.green)))]
@@ -430,7 +444,11 @@ function runCommand(raw: string, ctx: CmdCtx): Line[] | null {
           o(spans(s('SYNOPSIS', C.bold, true))),
           o(spans(s('    open <app>'))),
           o(spans(s(''))),
-          o(spans(s('    Apps : projects, about, contact, terminal, explorer, editor'))),
+          o(
+            spans(
+              s('    Apps : projects, about, contact, terminal, explorer, editor, robotlab, circuitlab')
+            )
+          ),
           o(spans(s(''))),
         ],
         neofetch: [

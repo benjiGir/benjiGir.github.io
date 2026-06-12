@@ -5,7 +5,7 @@ import { POIS } from '@/scene/pois'
 
 /** Bornes de distance par défaut (vue d'ensemble) — réappliquées quand le POI actif n'en définit pas. */
 const DEFAULT_MIN_DISTANCE = 0.6
-const DEFAULT_MAX_DISTANCE = 6
+const DEFAULT_MAX_DISTANCE = 7
 
 export default function CameraRig() {
   const ref = useRef<CameraControls>(null)

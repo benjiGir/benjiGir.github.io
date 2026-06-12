@@ -22,22 +22,22 @@ export interface PoiConfig {
   maxDist?: number
 }
 
-// Dalle écran centrée à y≈1.13, z≈-0.2
+// Dalle écran centrée à y≈1.13, z≈-1.5 (bureau reculé contre le mur du fond, Δz=-1.3)
 export const POIS: Record<PoiId, PoiConfig> = {
   overview: {
-    pos: [0, 2.2, 4.2],
-    target: [0, 0.75, 0],
+    pos: [0, 2.4, 4.6],
+    target: [0, 0.85, -0.6],
   },
   screen: {
-    pos: [0, 1.13, 0.85],
-    target: [0, 1.13, -0.2],
+    pos: [0, 1.13, -0.45],
+    target: [0, 1.13, -1.5],
     minDist: 0.4,
     maxDist: 1.2,
   },
-  // Coin musique — mur gauche, près de la fenêtre (phase 3)
+  // Coin musique — mur gauche, juste après la fenêtre (ouverture en z∈[1.18,1.82])
   guitar: {
-    pos: [-2.6, 1.3, 1.4],
-    target: [-3.6, 1.0, 1.6],
+    pos: [-2.6, 1.3, 2.5],
+    target: [-3.85, 1.0, 2.35],
     minDist: 0.8,
     maxDist: 2.5,
   },
@@ -62,11 +62,11 @@ export const POIS: Record<PoiId, PoiConfig> = {
     minDist: 0.8,
     maxDist: 2.5,
   },
-  // Tapis — robot NAO (phase 2)
+  // Tapis du robot NAO — zone dégagée à droite, décalée de l'axe caméra↔bureau (phase 2)
   robot: {
-    pos: [0.9, 1.0, 1.2],
-    target: [0.5, 0.3, 0.6],
+    pos: [1.6, 1.3, 1.8],
+    target: [0.6, 0.2, 2.6],
     minDist: 0.6,
-    maxDist: 2,
+    maxDist: 3,
   },
 }
