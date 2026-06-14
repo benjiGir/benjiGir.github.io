@@ -1,13 +1,14 @@
 import { Suspense } from 'react'
 import { Canvas } from '@react-three/fiber'
 import { Loader } from '@react-three/drei'
-import Experience from '@/scene/Experience'
+import Experience from '@/scene/core/Experience'
 import CameraUI from '@/components/CameraUI'
 import MobileWarning from '@/components/MobileWarning'
+import WipBadge from '@/components/WipBadge'
 import AudioUnlock from '@/components/AudioUnlock'
 import MuteToggle from '@/components/MuteToggle'
-import FullscreenOverlay from '@/os/FullscreenOverlay'
-import ScreenPortal from '@/os/ScreenPortal'
+import FullscreenOverlay from '@/os/window/FullscreenOverlay'
+import ScreenPortal from '@/os/window/ScreenPortal'
 import EditorPanel from '@/editor/EditorPanel'
 
 // @ts-ignore
@@ -31,6 +32,7 @@ export default function App() {
       <FullscreenOverlay />
       <ScreenPortal />
       <MobileWarning />
+      <WipBadge />
       <AudioUnlock />
       <MuteToggle />
       {DEBUG && <EditorPanel />}

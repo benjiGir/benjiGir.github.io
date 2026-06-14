@@ -1,7 +1,8 @@
 import type { ReactElement } from 'react'
 import { Canvas } from '@react-three/fiber'
 import * as THREE from 'three'
-import RobotModel, { TargetMarker } from '@/scene/RobotModel'
+import { RobotModel } from '@/scene/corners/robot/RobotModel'
+import { TargetMarker } from '@/scene/corners/robot/parts/TargetMarker'
 import { GRID_SIZE, CELL_SIZE, cellToWorld } from '@/store/useRobotStore'
 
 // Centre de la grille (en coordonnées "monde" de la scène principale, réutilisées telles

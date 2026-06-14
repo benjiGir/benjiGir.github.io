@@ -1,5 +1,5 @@
 import { create } from 'zustand'
-import type { PoiId } from '@/scene/pois'
+import type { PoiId } from '@/scene/camera/pois'
 
 export type { PoiId }
 

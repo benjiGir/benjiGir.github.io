@@ -10,8 +10,8 @@ interface CircuitStore {
 }
 
 /**
- * État partagé entre l'app OS « Circuit Lab » et `scene/Workbench.tsx` : la LED de la
- * breadboard 3D change de couleur/comportement selon le nombre de niveaux résolus.
+ * État partagé entre l'app OS « Circuit Lab » et `scene/corners/workbench/Workbench.tsx` :
+ * la LED de la breadboard 3D change de couleur/comportement selon le nombre de niveaux résolus.
  * Persisté en localStorage pour conserver la progression entre les sessions.
  */
 export const useCircuitStore = create<CircuitStore>()(

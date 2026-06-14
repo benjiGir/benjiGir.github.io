@@ -2,13 +2,13 @@ import { create } from 'zustand'
 
 // Grille logique du tapis sur laquelle évolue le robot NAO. Le tapis 3D dédié au robot mesure
 // 1.6 × 1.6 m, centré en (0.6, 0.005, 2.6) — zone dégagée à droite, décalée de l'axe
-// caméra↔bureau (voir `scene/DeskScene.tsx`). La grille 6×6 (span = (GRID_SIZE-1)*CELL_SIZE
+// caméra↔bureau (voir `scene/desk/Room.tsx`). La grille 6×6 (span = (GRID_SIZE-1)*CELL_SIZE
 // = 1.0 m) est centrée sur ce tapis.
 export const GRID_SIZE = 6
 export const CELL_SIZE = 0.2
 // Coin (0, 0) de la grille en coordonnées monde (X, Z) — la cellule (col, row) est centrée en
 // (GRID_ORIGIN_X + col * CELL_SIZE, GRID_ORIGIN_Z + row * CELL_SIZE). Centré sur le tapis du
-// robot, cohérent avec le cadrage du POI 'robot' (cf. scene/pois.ts).
+// robot, cohérent avec le cadrage du POI 'robot' (cf. scene/camera/pois.ts).
 export const GRID_ORIGIN_X = 0.1
 export const GRID_ORIGIN_Z = 2.1
 
@@ -173,7 +173,7 @@ export const useRobotStore = create<RobotState>((set, get) => ({
 
   // Exécute l'instruction courante puis avance le curseur. Appelé par la scène 3D au rythme
   // de l'animation (~600ms/instruction) — la logique de déplacement vit ici, l'animation visuelle
-  // (interpolation de position/rotation) vit dans `scene/Robot.tsx`.
+  // (interpolation de position/rotation) vit dans `scene/corners/robot/RobotModel.tsx`.
   step: () => {
     const { queue, currentStep, col, row, dir, levelIndex } = get()
     if (currentStep === null) return

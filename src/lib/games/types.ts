@@ -1,5 +1,5 @@
 // Interface commune pour les "cartouches" de jeux rétro affichés sur la TV CRT
-// (`scene/RetroCorner.tsx`). Chaque jeu est un module indépendant qui implémente
+// (`scene/corners/retro/RetroCorner.tsx`). Chaque jeu est un module indépendant qui implémente
 // `GameModule` : la TV se contente d'appeler `init`, puis `update`/`draw` à chaque frame
 // tant que le POI 'crt' est actif. Permet d'ajouter Snake/Breakout sans toucher à la TV.
 

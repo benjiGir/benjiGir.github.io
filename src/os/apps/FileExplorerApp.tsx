@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useWindowStore } from '@/store/useWindowStore'
-import { APP_REGISTRY } from '@/os/appRegistry'
+import { APP_REGISTRY } from '@/os/window/appRegistry'
 import { playClick } from '@/lib/audio'
 
 type Entry =
