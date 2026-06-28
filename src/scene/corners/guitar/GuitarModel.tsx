@@ -144,7 +144,7 @@ interface GuitarModelProps {
 }
 
 export function GuitarModel({ stringTriggerRef, interactive }: GuitarModelProps) {
-  const { nodes, materials } = useGLTF('/models/guitar.glb') as unknown as GLTFResult
+  const { nodes, materials } = useGLTF('/models/guitar.opt.glb') as unknown as GLTFResult
 
   // Quaternion de permutation d'axes (cf. commentaire NECK_SIGN/FACE_SIGN plus haut) : envoie
   // X local (manche) → Y monde, Y local (épaisseur) → Z monde, Z local (cordes) → X monde.
@@ -694,4 +694,4 @@ export function GuitarModel({ stringTriggerRef, interactive }: GuitarModelProps)
   )
 }
 
-useGLTF.preload('/models/guitar.glb')
+useGLTF.preload('/models/guitar.opt.glb')

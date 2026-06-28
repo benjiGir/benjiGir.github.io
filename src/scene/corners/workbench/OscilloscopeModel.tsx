@@ -162,7 +162,7 @@ type GLTFResult = GLTF & {
 }
 
 export function Model(props: IntrinsicElements['group']) {
-  const { nodes, materials } = useGLTF('/models/oscilloscope.glb') as unknown as GLTFResult
+  const { nodes, materials } = useGLTF('/models/oscilloscope.opt.glb') as unknown as GLTFResult
   return (
     <group {...props} dispose={null}>
       <group name="db0353bc762d4ae7bc227df01fee1c17fbx" scale={0.01}>
@@ -1139,4 +1139,4 @@ export function Model(props: IntrinsicElements['group']) {
   )
 }
 
-useGLTF.preload('/models/oscilloscope.glb')
+useGLTF.preload('/models/oscilloscope.opt.glb')
