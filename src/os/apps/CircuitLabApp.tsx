@@ -1,101 +1,99 @@
 import { useMemo, useState } from 'react'
 import { useCircuitStore } from '@/store/useCircuitStore'
-import { playClick } from '@/lib/audio'
-import type { GateType, PortDef, Wire } from '@/lib/circuit/types'
-import { LEVELS } from '@/lib/circuit/levels'
-import { isCircuitCorrect } from '@/lib/circuit/eval'
+import { playBurnout, playClick } from '@/lib/audio'
+import { LEVELS, simulateAndBurnout } from '@/lib/circuit/levels'
+import type { ComponentType, Hole, PlacedComponent } from '@/lib/circuit/types'
+import CircuitBreadboard from '@/os/apps/CircuitBreadboard'
+import CircuitToolbox, { type ToolSelection } from '@/os/apps/CircuitToolbox'
 
-// ─── Géométrie SVG ──────────────────────────────────────────────────────────────
-
-const COL_W = 110
-const ROW_H = 50
-const PORT_W = 70
-const PORT_H = 32
-
-function portCenter(port: PortDef): { x: number; y: number } {
-  return { x: port.col * COL_W + PORT_W / 2 + 20, y: port.row * ROW_H + PORT_H / 2 + 20 }
+let nextComponentId = 0
+function makeComponentId(type: ComponentType) {
+  nextComponentId += 1
+  return `${type}-${nextComponentId}`
 }
 
-const GATE_COLORS: Record<GateType, string> = {
-  AND: '#60a5fa',
-  OR: '#34d399',
-  NOT: '#f59e0b',
-  XOR: '#c084fc',
+function sameHole(a: Hole, b: Hole): boolean {
+  return a.column === b.column && a.row === b.row
 }
-
-// ─── Composant ────────────────────────────────────────────────────────────────
 
 export default function CircuitLabApp() {
   const solvedLevels = useCircuitStore((s) => s.solvedLevels)
   const markSolved = useCircuitStore((s) => s.markSolved)
 
   const [levelIndex, setLevelIndex] = useState(0)
-  const [wires, setWires] = useState<Wire[]>([])
-  const [pending, setPending] = useState<string | null>(null)
-  const [feedback, setFeedback] = useState<'idle' | 'success'>('idle')
+  const [components, setComponents] = useState<PlacedComponent[]>([])
+  const [pendingHole, setPendingHole] = useState<Hole | null>(null)
+  const [selection, setSelection] = useState<ToolSelection>({ type: 'wire' })
+  const [solved, setSolved] = useState(false)
 
   const level = LEVELS[levelIndex]
 
-  const svgSize = useMemo(() => {
-    const maxCol = Math.max(...level.ports.map((p) => p.col))
-    const maxRow = Math.max(...level.ports.map((p) => p.row))
-    return { w: (maxCol + 1) * COL_W + 40, h: (maxRow + 1) * ROW_H + 40 }
-  }, [level])
+  const { currentByComponentId, shortCircuit } = useMemo(() => {
+    const { result } = simulateAndBurnout(components)
+    return result
+  }, [components])
 
   function resetLevel() {
-    setWires([])
-    setPending(null)
-    setFeedback('idle')
+    setComponents([])
+    setPendingHole(null)
+    setSolved(false)
   }
 
   function selectLevel(i: number) {
     playClick()
     setLevelIndex(i)
-    setWires([])
-    setPending(null)
-    setFeedback('idle')
+    setComponents([])
+    setPendingHole(null)
+    setSolved(false)
   }
 
-  function handlePortClick(portId: string) {
-    const port = level.ports.find((p) => p.id === portId)
-    if (!port) return
-    // On ne peut pas démarrer un fil depuis une sortie de circuit, ni le terminer sur une entrée
-    if (pending === null) {
-      if (port.kind === 'output') return
-      setPending(portId)
-      return
-    }
-    if (pending === portId) {
-      setPending(null)
-      return
-    }
-    const fromPort = level.ports.find((p) => p.id === pending)
-    if (!fromPort) return
-    if (port.kind === 'input') {
-      setPending(portId)
-      return
-    }
-    // Évite les doublons exacts
-    const exists = wires.some((w) => w.from === pending && w.to === portId)
-    const next = exists ? wires : [...wires, { from: pending, to: portId }]
-    setWires(next)
-    setPending(null)
-    playClick()
-
-    // Vérification automatique
-    if (isCircuitCorrect(level, next)) {
-      setFeedback('success')
-      markSolved(levelIndex)
-    } else {
-      setFeedback('idle')
+  function commitComponents(next: PlacedComponent[]) {
+    const { components: withBurnout } = simulateAndBurnout(next)
+    const justBurned = withBurnout.some(
+      (c, i) => c.type === 'led' && c.burnedOut && !(next[i]?.burnedOut ?? false)
+    )
+    if (justBurned) playBurnout()
+    setComponents(withBurnout)
+    if (!level.sandbox) {
+      const isSolved = level.isSolved(withBurnout)
+      setSolved(isSolved)
+      if (isSolved) markSolved(levelIndex)
     }
   }
 
-  function removeWire(index: number) {
+  function handleHoleClick(hole: Hole) {
+    if (pendingHole === null) {
+      setPendingHole(hole)
+      return
+    }
+    if (sameHole(pendingHole, hole)) {
+      setPendingHole(null)
+      return
+    }
+    // Empêche de poser un composant entre deux trous déjà identiques à un composant existant
+    const newComponent: PlacedComponent = {
+      id: makeComponentId(selection.type),
+      type: selection.type,
+      holeA: pendingHole,
+      holeB: hole,
+      ...(selection.type === 'resistor' ? { resistanceOhm: selection.resistanceOhm } : {}),
+      ...(selection.type === 'led' ? { ledColor: selection.ledColor } : {}),
+      ...(selection.type === 'switch' ? { closed: false } : {}),
+    }
     playClick()
-    const next = wires.filter((_, i) => i !== index)
-    setWires(next)
-    setFeedback(isCircuitCorrect(level, next) ? 'success' : 'idle')
+    commitComponents([...components, newComponent])
+    setPendingHole(null)
+  }
+
+  function handleComponentClick(component: PlacedComponent) {
+    if (component.type === 'switch') {
+      playClick()
+      const next = components.map((c) => (c.id === component.id ? { ...c, closed: !c.closed } : c))
+      commitComponents(next)
+      return
+    }
+    playClick()
+    commitComponents(components.filter((c) => c.id !== component.id))
   }
 
   return (
@@ -121,7 +119,7 @@ export default function CircuitLabApp() {
       >
         {LEVELS.map((lvl, i) => {
           const unlocked = i <= solvedLevels
-          const solved = i < solvedLevels
+          const isSolvedLevel = i < solvedLevels && !lvl.sandbox
           return (
             <button
               key={lvl.id}
@@ -134,7 +132,7 @@ export default function CircuitLabApp() {
                   i === levelIndex
                     ? '1px solid rgba(120,170,255,0.6)'
                     : '1px solid rgba(255,255,255,0.1)',
-                background: solved
+                background: isSolvedLevel
                   ? 'rgba(52,211,153,0.18)'
                   : i === levelIndex
                     ? 'rgba(120,170,255,0.16)'
@@ -145,7 +143,7 @@ export default function CircuitLabApp() {
                 cursor: unlocked ? 'pointer' : 'not-allowed',
               }}
             >
-              {solved ? '✓ ' : ''}
+              {isSolvedLevel ? '✓ ' : ''}
               {i + 1}
             </button>
           )
@@ -158,104 +156,21 @@ export default function CircuitLabApp() {
         <div style={{ fontSize: 11, opacity: 0.65, marginTop: 4, lineHeight: 1.5 }}>
           {level.description}
         </div>
-        <div style={{ fontSize: 10, opacity: 0.45, marginTop: 4 }}>
-          Clique un port de départ puis un port d'arrivée pour poser un fil. Reclique sur un fil
-          existant pour le retirer.
-        </div>
       </div>
 
-      {/* ── Plateau de circuit ── */}
-      <div style={{ flex: 1, overflow: 'auto', padding: 12 }}>
-        <svg
-          width={svgSize.w}
-          height={svgSize.h}
-          style={{ display: 'block', margin: '0 auto', maxWidth: '100%' }}
-        >
-          {/* Fils posés */}
-          {wires.map((w, i) => {
-            const from = level.ports.find((p) => p.id === w.from)
-            const to = level.ports.find((p) => p.id === w.to)
-            if (!from || !to) return null
-            const a = portCenter(from)
-            const b = portCenter(to)
-            return (
-              <g key={i} style={{ cursor: 'pointer' }} onClick={() => removeWire(i)}>
-                <path
-                  d={`M ${a.x + PORT_W / 2} ${a.y} C ${a.x + PORT_W / 2 + 30} ${a.y}, ${b.x - PORT_W / 2 - 30} ${b.y}, ${b.x - PORT_W / 2} ${b.y}`}
-                  stroke={feedback === 'success' ? '#34d399' : '#facc15'}
-                  strokeWidth={3}
-                  fill="none"
-                  opacity={0.85}
-                />
-              </g>
-            )
-          })}
-
-          {/* Aperçu du fil en cours */}
-          {pending && (
-            <text
-              x={portCenter(level.ports.find((p) => p.id === pending)!).x}
-              y={portCenter(level.ports.find((p) => p.id === pending)!).y - PORT_H / 2 - 6}
-              fill="#facc15"
-              fontSize={9}
-              textAnchor="middle"
-            >
-              choisir l'arrivée…
-            </text>
-          )}
-
-          {/* Ports */}
-          {level.ports.map((port) => {
-            const c = portCenter(port)
-            const x = c.x - PORT_W / 2
-            const y = c.y - PORT_H / 2
-            const isPending = pending === port.id
-            let fill = 'rgba(255,255,255,0.06)'
-            let stroke = 'rgba(255,255,255,0.18)'
-            if (port.kind === 'input') {
-              fill = 'rgba(96,165,250,0.14)'
-              stroke = '#60a5fa'
-            } else if (port.kind === 'output') {
-              fill = feedback === 'success' ? 'rgba(52,211,153,0.28)' : 'rgba(248,113,113,0.14)'
-              stroke = feedback === 'success' ? '#34d399' : '#f87171'
-            } else if (port.gate) {
-              fill = `${GATE_COLORS[port.gate]}22`
-              stroke = GATE_COLORS[port.gate]
-            }
-            if (isPending) stroke = '#facc15'
-
-            return (
-              <g
-                key={port.id}
-                onClick={() => handlePortClick(port.id)}
-                style={{
-                  cursor: port.kind === 'output' && pending === null ? 'default' : 'pointer',
-                }}
-              >
-                <rect
-                  x={x}
-                  y={y}
-                  width={PORT_W}
-                  height={PORT_H}
-                  rx={6}
-                  fill={fill}
-                  stroke={stroke}
-                  strokeWidth={isPending ? 2.5 : 1.5}
-                />
-                <text
-                  x={c.x}
-                  y={c.y + 4}
-                  fill="rgba(255,255,255,0.92)"
-                  fontSize={11}
-                  fontWeight={600}
-                  textAnchor="middle"
-                >
-                  {port.label}
-                </text>
-              </g>
-            )
-          })}
-        </svg>
+      {/* ── Corps : boîte à outils + plaque ── */}
+      <div style={{ flex: 1, display: 'flex', minHeight: 0 }}>
+        <CircuitToolbox selection={selection} onSelect={setSelection} />
+        <div style={{ flex: 1, overflow: 'auto', padding: 12 }}>
+          <CircuitBreadboard
+            components={components}
+            pendingHole={pendingHole}
+            currentByComponentId={currentByComponentId}
+            shortCircuit={shortCircuit}
+            onHoleClick={handleHoleClick}
+            onComponentClick={handleComponentClick}
+          />
+        </div>
       </div>
 
       {/* ── Pied de page : statut + reset ── */}
@@ -271,13 +186,17 @@ export default function CircuitLabApp() {
       >
         <span
           style={{
-            color: feedback === 'success' ? '#34d399' : 'rgba(255,255,255,0.5)',
+            color: shortCircuit ? '#f87171' : solved ? '#34d399' : 'rgba(255,255,255,0.5)',
             fontWeight: 600,
           }}
         >
-          {feedback === 'success'
-            ? "Circuit correct ! La LED de l'établi s'allume."
-            : 'Circuit incomplet…'}
+          {level.sandbox
+            ? 'Bac à sable — bricole librement.'
+            : shortCircuit
+              ? 'Court-circuit ! Ajoute une résistance ou une LED sur le chemin.'
+              : solved
+                ? 'Circuit correct ! La LED de l’établi s’allume.'
+                : 'Circuit incomplet…'}
         </span>
         <button
           onClick={() => {

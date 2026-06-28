@@ -1,154 +1,179 @@
-// Évaluation des circuits du Circuit Lab : simulation du graphe de fils posés par le
-// joueur, génération des combinaisons d'entrées et vérification de la correction d'un
-// niveau par rapport au câblage de référence.
+// Simulation électrique du Circuit Lab — "loi d'Ohm allégée".
+//
+// PORTÉE EXPLICITEMENT LIMITÉE : ce moteur reste correct pour des circuits série/parallèle
+// simples où chaque branche a sa propre résistance dédiée (c'est le cas pour les 5 niveaux de
+// ce module, voir `levels.ts`). Si une résistance ou un fil est PARTAGÉ par plusieurs branches
+// qui divergent ensuite (ex. une résistance commune avant deux LED en parallèle), le modèle
+// additionne les courants de chaque chemin traversant cet élément pour l'affichage/la détection
+// de surcharge, SANS redistribution non-linéaire exacte entre branches de tensions de seuil
+// différentes. C'est une approximation acceptée pour cet outil pédagogique (pas un solveur
+// SPICE/analyse nodale complet), pas un bug à corriger.
 
-import type { GateType, Level, PortDef, Wire } from '@/lib/circuit/types'
+import { BATTERY_VOLTAGE, holeNodeId, RAIL_NEG, RAIL_POS } from '@/lib/circuit/board'
+import type { LedColor, PlacedComponent } from '@/lib/circuit/types'
 
-// Combien d'entrées attend chaque type de porte
-export const GATE_INPUTS: Record<GateType, number> = { AND: 2, OR: 2, NOT: 1, XOR: 2 }
+/** Tension de seuil (Vf) par couleur de LED, en volts. */
+export const LED_FORWARD_VOLTAGE: Record<LedColor, number> = {
+  red: 1.8,
+  yellow: 2.0,
+  green: 2.1,
+  blue: 3.0,
+}
 
-export function evalGate(gate: GateType, inputs: number[]): number {
-  switch (gate) {
-    case 'AND':
-      return inputs.every((v) => v === 1) ? 1 : 0
-    case 'OR':
-      return inputs.some((v) => v === 1) ? 1 : 0
-    case 'NOT':
-      return inputs[0] === 1 ? 0 : 1
-    case 'XOR':
-      return inputs.reduce((a, b) => a ^ b, 0)
-  }
+/** Résistance interne d'une LED traversée dans le bon sens, en ohms. */
+export const LED_ON_RESISTANCE = 10
+
+/** Courant maximum sûr pour une LED — au-delà, elle grille définitivement. */
+export const LED_MAX_SAFE_A = 0.02
+
+/** Profondeur maximale explorée par le DFS de recherche de chemins — évite l'explosion combinatoire. */
+const MAX_PATH_DEPTH = 8
+
+export interface SolveResult {
+  /** Courant accumulé (ampères) par identifiant de composant. */
+  currentByComponentId: Record<string, number>
+  /** Vrai si au moins un chemin sans résistance ni LED relie directement les deux rails. */
+  shortCircuit: boolean
+}
+
+interface Edge {
+  component: PlacedComponent
+  nodeA: string
+  nodeB: string
 }
 
 /**
- * Évalue le circuit pour un jeu de valeurs d'entrée donné, en suivant les fils posés.
- * Renvoie `null` si le circuit est mal formé (port non alimenté, cycle, etc.) — dans ce cas
- * la fonction logique n'est pas définie et le niveau ne peut pas être validé.
+ * Simule le circuit posé sur la plaque et renvoie le courant par composant.
+ *
+ * @param components Composants actuellement posés sur la plaque.
+ * @param switchOverrides État d'interrupteur à FORCER pour la simulation (par id de composant),
+ *   sans modifier l'état réel affiché — utilisé pour valider un niveau en testant "et si
+ *   l'interrupteur était fermé/ouvert" indépendamment de ce que voit le joueur.
  */
-export function evaluateCircuit(
-  ports: PortDef[],
-  wires: Wire[],
-  inputValues: Record<string, number>
-): number | null {
-  const values: Record<string, number | undefined> = { ...inputValues }
+export function solveCircuit(
+  components: PlacedComponent[],
+  switchOverrides?: Record<string, boolean>
+): SolveResult {
+  const edges: Edge[] = components.map((c) => ({
+    component: c,
+    nodeA: holeNodeId(c.holeA),
+    nodeB: holeNodeId(c.holeB),
+  }))
 
-  // Résolution itérative simple (le graphe est petit et acyclique) : on boucle jusqu'à ce que
-  // toutes les valeurs soient connues ou qu'on ne progresse plus.
-  let progressed = true
-  let guard = 0
-  while (progressed && guard < 20) {
-    progressed = false
-    guard++
-    for (const port of ports) {
-      if (port.kind === 'input') continue
-      if (values[port.id] !== undefined) continue
-      if (port.kind === 'gate' && port.gate) {
-        const incoming = wires.filter((w) => w.to === port.id)
-        const needed = GATE_INPUTS[port.gate]
-        if (incoming.length !== needed) continue
-        const inputVals = incoming.map((w) => values[w.from])
-        if (inputVals.some((v) => v === undefined)) continue
-        values[port.id] = evalGate(port.gate, inputVals as number[])
-        progressed = true
-      } else if (port.kind === 'output') {
-        const incoming = wires.filter((w) => w.to === port.id)
-        if (incoming.length !== 1) continue
-        const v = values[incoming[0].from]
-        if (v === undefined) continue
-        values[port.id] = v
-        progressed = true
-      }
+  const currentByComponentId: Record<string, number> = {}
+  for (const c of components) currentByComponentId[c.id] = 0
+
+  const paths = findSimplePaths(edges, RAIL_POS, RAIL_NEG, MAX_PATH_DEPTH)
+
+  let shortCircuit = false
+
+  for (const path of paths) {
+    const result = evaluatePath(path, switchOverrides)
+    if (result === 'short') {
+      shortCircuit = true
+      continue
+    }
+    if (result.current <= 0) continue
+    for (const edge of path) {
+      currentByComponentId[edge.component.id] += result.current
     }
   }
 
-  const out = ports.find((p) => p.kind === 'output')
-  if (!out) return null
-  return values[out.id] ?? null
+  // LED grillée si le courant accumulé dépasse le seuil sûr — état persistant géré par
+  // l'appelant (qui doit reporter `burnedOut = true` sur le composant correspondant).
+  return { currentByComponentId, shortCircuit }
 }
 
-/** Génère toutes les combinaisons possibles 0/1 pour les entrées d'un niveau. */
-export function allInputCombos(inputIds: string[]): Record<string, number>[] {
-  const n = inputIds.length
-  const combos: Record<string, number>[] = []
-  for (let mask = 0; mask < 1 << n; mask++) {
-    const combo: Record<string, number> = {}
-    inputIds.forEach((id, i) => {
-      combo[id] = (mask >> i) & 1
-    })
-    combos.push(combo)
+/** Énumère tous les chemins simples (sans nœud répété) reliant `start` à `end` dans le graphe. */
+function findSimplePaths(edges: Edge[], start: string, end: string, maxDepth: number): Edge[][] {
+  const paths: Edge[][] = []
+  const visitedNodes = new Set<string>([start])
+  const current: Edge[] = []
+
+  function dfs(node: string) {
+    if (node === end) {
+      paths.push([...current])
+      return
+    }
+    if (current.length >= maxDepth) return
+    for (const edge of edges) {
+      let nextNode: string | null = null
+      if (edge.nodeA === node && !visitedNodes.has(edge.nodeB)) nextNode = edge.nodeB
+      else if (edge.nodeB === node && !visitedNodes.has(edge.nodeA)) nextNode = edge.nodeA
+      if (nextNode === null) continue
+
+      visitedNodes.add(nextNode)
+      current.push(edge)
+      dfs(nextNode)
+      current.pop()
+      visitedNodes.delete(nextNode)
+    }
   }
-  return combos
+
+  dfs(start)
+  return paths
+}
+
+/** Résultat de l'évaluation d'un chemin : un courant (peut être 0), ou un court-circuit détecté. */
+function evaluatePath(
+  path: Edge[],
+  switchOverrides?: Record<string, boolean>
+): { current: number } | 'short' {
+  let totalR = 0
+  let totalVf = 0
+  let node = RAIL_POS
+
+  for (const edge of path) {
+    const { component } = edge
+    // Sens de traversée de ce composant le long du chemin, de `node` vers l'autre extrémité.
+    const traversedFromAtoB = edge.nodeA === node
+    node = traversedFromAtoB ? edge.nodeB : edge.nodeA
+
+    if (component.type === 'switch') {
+      const closed = switchOverrides?.[component.id] ?? component.closed ?? false
+      if (!closed) return { current: 0 }
+    }
+
+    if (component.type === 'resistor') {
+      totalR += component.resistanceOhm ?? 0
+    }
+
+    if (component.type === 'led') {
+      if (component.burnedOut) return { current: 0 }
+      // La LED conduit de l'anode (holeA) vers la cathode (holeB). Le chemin doit la traverser
+      // dans ce sens (de `holeA` vers `holeB`) pour être passant.
+      const traversedAnodeToCathode = traversedFromAtoB
+      if (!traversedAnodeToCathode) return { current: 0 } // diode bloquante
+      totalR += LED_ON_RESISTANCE
+      totalVf += component.ledColor ? LED_FORWARD_VOLTAGE[component.ledColor] : 0
+    }
+    // 'wire' : pas de résistance ni de tension de seuil ajoutée.
+  }
+
+  if (totalR === 0) return 'short'
+  if (BATTERY_VOLTAGE <= totalVf) return { current: 0 }
+
+  return { current: (BATTERY_VOLTAGE - totalVf) / totalR }
 }
 
 /**
- * Vérifie si le circuit posé par le joueur est correct : il doit calculer EXACTEMENT la
- * fonction logique attendue (déduite du circuit "modèle" décrit par `ports`/portes du
- * niveau) pour toutes les combinaisons d'entrées. On compare donc le circuit du joueur
- * (mêmes ports, fils du joueur) vs le circuit de référence (mêmes ports, en supposant un
- * câblage "naturel" : chaque porte/sortie reçoit ses entrées dans l'ordre de définition).
+ * Applique le résultat d'une simulation aux composants : toute LED dont le courant accumulé
+ * dépasse `LED_MAX_SAFE_A` passe en `burnedOut: true` de façon persistante. Renvoie une nouvelle
+ * liste de composants (immutabilité) — ne fait rien si aucune LED ne grille (même référence).
  */
-export function isCircuitCorrect(level: Level, wires: Wire[]): boolean {
-  const inputIds = level.ports.filter((p) => p.kind === 'input').map((p) => p.id)
-  const combos = allInputCombos(inputIds)
-
-  // Circuit de référence : connexions "logiques" déduites de l'ordre des ports — chaque
-  // porte/sortie consomme dans l'ordre les sorties des ports précédents qui ne sont pas
-  // déjà utilisés comme source ailleurs (topologie linéaire simple, cohérente avec la
-  // disposition des niveaux ci-dessus).
-  const referenceWires = referenceWiring(level)
-
-  for (const combo of combos) {
-    const player = evaluateCircuit(level.ports, wires, combo)
-    const reference = evaluateCircuit(level.ports, referenceWires, combo)
-    if (player === null || player !== reference) return false
-  }
-  return true
-}
-
-/** Construit le câblage "idéal" attendu pour un niveau (utilisé pour la validation). */
-export function referenceWiring(level: Level): Wire[] {
-  switch (level.id) {
-    case 0: // AND : in0,in1 -> g0 -> out
-      return [
-        { from: 'in0', to: 'g0' },
-        { from: 'in1', to: 'g0' },
-        { from: 'g0', to: 'out' },
-      ]
-    case 1: // OR
-      return [
-        { from: 'in0', to: 'g0' },
-        { from: 'in1', to: 'g0' },
-        { from: 'g0', to: 'out' },
-      ]
-    case 2: // NOT
-      return [
-        { from: 'in0', to: 'g0' },
-        { from: 'g0', to: 'out' },
-      ]
-    case 3: // XOR
-      return [
-        { from: 'in0', to: 'g0' },
-        { from: 'in1', to: 'g0' },
-        { from: 'g0', to: 'out' },
-      ]
-    case 4: // NAND : (A AND B) -> NOT -> out
-      return [
-        { from: 'in0', to: 'g0' },
-        { from: 'in1', to: 'g0' },
-        { from: 'g0', to: 'g1' },
-        { from: 'g1', to: 'out' },
-      ]
-    case 5: // (A OR B) XOR (A AND C) -> out
-      return [
-        { from: 'in0', to: 'g0' },
-        { from: 'in1', to: 'g0' },
-        { from: 'in0', to: 'g1' },
-        { from: 'in2', to: 'g1' },
-        { from: 'g0', to: 'g2' },
-        { from: 'g1', to: 'g2' },
-        { from: 'g2', to: 'out' },
-      ]
-    default:
-      return []
-  }
+export function applyBurnout(
+  components: PlacedComponent[],
+  result: SolveResult
+): PlacedComponent[] {
+  let changed = false
+  const next = components.map((c) => {
+    if (c.type !== 'led' || c.burnedOut) return c
+    const current = result.currentByComponentId[c.id] ?? 0
+    if (current > LED_MAX_SAFE_A) {
+      changed = true
+      return { ...c, burnedOut: true }
+    }
+    return c
+  })
+  return changed ? next : components
 }

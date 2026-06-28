@@ -246,6 +246,39 @@ export function playCrtOn() {
   thunk.stop(now + 0.09)
 }
 
+/** LED qui grille — petit "pop" bref avec pitch descendant + souffle de bruit. */
+export function playBurnout() {
+  const c = getCtx()
+  if (!master) return
+  const now = c.currentTime
+
+  const osc = c.createOscillator()
+  const gain = c.createGain()
+  osc.type = 'sawtooth'
+  osc.frequency.setValueAtTime(500, now)
+  osc.frequency.exponentialRampToValueAtTime(60, now + 0.18)
+  gain.gain.setValueAtTime(0.0001, now)
+  gain.gain.exponentialRampToValueAtTime(0.08, now + 0.008)
+  gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.2)
+  osc.connect(gain).connect(master)
+  osc.start(now)
+  osc.stop(now + 0.21)
+
+  const bufferSize = Math.floor(c.sampleRate * 0.08)
+  const buffer = c.createBuffer(1, bufferSize, c.sampleRate)
+  const data = buffer.getChannelData(0)
+  for (let i = 0; i < bufferSize; i++) data[i] = Math.random() * 2 - 1
+
+  const noise = c.createBufferSource()
+  noise.buffer = buffer
+  const noiseGain = c.createGain()
+  noiseGain.gain.setValueAtTime(0.05, now)
+  noiseGain.gain.exponentialRampToValueAtTime(0.0001, now + 0.08)
+  noise.connect(noiseGain).connect(master)
+  noise.start(now)
+  noise.stop(now + 0.08)
+}
+
 /**
  * Joue un fichier audio en boucle (ambiance, musique de fond...).
  * `src` est une URL servie statiquement, ex. `/audio/ambient.mp3` (place le fichier dans `public/audio/`).

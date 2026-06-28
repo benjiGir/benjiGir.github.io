@@ -80,7 +80,7 @@ export const APP_REGISTRY: Record<string, AppMeta> = {
   },
   circuitlab: {
     title: 'Circuit Lab',
-    defaultSize: { w: 600, h: 460 },
+    defaultSize: { w: 740, h: 560 },
     color: '#facc15',
     icon: '/icons/oscillograph.png',
     component: CircuitLabApp,
