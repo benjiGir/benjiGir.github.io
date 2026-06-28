@@ -20,7 +20,7 @@ interface TvProps {
 
 export function Tv({ texture, on, onCartridgeClick }: TvProps) {
   return (
-    <group position={[-0.22, 0.79, 0.05]}>
+    <group position={[-0.22, 0.7525, -0.04]}>
       {/* Caisson principal — demi-profondeur 0.25, face avant en z=0.25 */}
       <mesh castShadow receiveShadow>
         <boxGeometry args={[0.62, 0.46, 0.5]} />
