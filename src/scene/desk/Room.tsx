@@ -1,6 +1,7 @@
 import { Geometry, Base, Subtraction } from '@react-three/csg'
 import * as THREE from 'three'
 import Editable from '@/editor/Editable'
+import {HousePlant} from "@/scene/desk/HousePlant.tsx";
 
 // ─── Room ─────────────────────────────────────────────────────────────────────
 
@@ -118,35 +119,7 @@ export function Room() {
 
       {/* ── Plante d'intérieur — coin gauche-fond ── */}
       <Editable id="plant" label="Plante">
-        {/* Pot */}
-        <mesh position={[-3.5, 0.0, -3.5]} castShadow receiveShadow>
-          <cylinderGeometry args={[0.12, 0.09, 0.22, 20]} />
-          <meshStandardMaterial color="#a0522d" roughness={0.8} metalness={0} />
-        </mesh>
-        {/* Terre */}
-        <mesh position={[-3.5, 0.115, -3.5]} receiveShadow>
-          <cylinderGeometry args={[0.11, 0.11, 0.01, 20]} />
-          <meshStandardMaterial color="#3d2b1f" roughness={0.95} metalness={0} />
-        </mesh>
-        {/* Tronc */}
-        <mesh position={[-3.5, 0.42, -3.5]} castShadow>
-          <cylinderGeometry args={[0.025, 0.035, 0.42, 12]} />
-          <meshStandardMaterial color="#5c4020" roughness={0.85} metalness={0} />
-        </mesh>
-        {/* Feuillage — sphère principale */}
-        <mesh position={[-3.5, 0.78, -3.5]} castShadow>
-          <sphereGeometry args={[0.26, 16, 16]} />
-          <meshStandardMaterial color="#2d5a27" roughness={0.85} metalness={0} />
-        </mesh>
-        {/* Feuillage — lobes latéraux pour plus de volume */}
-        <mesh position={[-3.68, 0.72, -3.5]} castShadow>
-          <sphereGeometry args={[0.18, 12, 12]} />
-          <meshStandardMaterial color="#234d1e" roughness={0.85} metalness={0} />
-        </mesh>
-        <mesh position={[-3.5, 0.72, -3.68]} castShadow>
-          <sphereGeometry args={[0.16, 12, 12]} />
-          <meshStandardMaterial color="#2a5424" roughness={0.85} metalness={0} />
-        </mesh>
+        <HousePlant />
       </Editable>
 
       {/* ── Fenêtre sur le mur gauche ── */}
