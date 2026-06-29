@@ -1,6 +1,7 @@
 import { useState, type ReactNode } from 'react'
 import { Html } from '@react-three/drei'
 import { useCameraStore, type PoiId } from '@/store/useCameraStore'
+import { useEditorStore } from '@/editor/useEditorStore'
 import { playClick } from '@/lib/audio'
 
 interface HotspotProps {
@@ -24,6 +25,16 @@ export default function Hotspot({ poi, label, position, onFocus, children }: Hot
   const [hovered, setHovered] = useState(false)
   const activePoi = useCameraStore((s) => s.poi)
   const focusOn = useCameraStore((s) => s.focusOn)
+  const editing = useEditorStore((s) => s.enabled)
+
+  // En mode éditeur de scène, le Hotspot s'efface : il devient un simple groupe de position (ni
+  // clic focus-caméra, ni tooltip), pour ne pas chevaucher la sélection/déplacement de l'objet par
+  // le gizmo de l'<Editable> qu'il enveloppe. La `position` reste appliquée (l'objet ne saute pas au
+  // basculement) et c'est le même type <group> dans les deux cas, donc le contenu n'est PAS remonté
+  // (état des coins et overrides préservés).
+  if (editing) {
+    return <group position={position}>{children}</group>
+  }
 
   const enabled = activePoi === 'overview'
 

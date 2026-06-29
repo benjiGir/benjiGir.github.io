@@ -48,6 +48,8 @@ interface EditorStore {
   gizmoMode: GizmoMode
   /** Vrai pendant un drag du gizmo — la freecam doit alors ignorer les inputs. */
   isDragging: boolean
+  /** Auto-fit/snapping en mode translate (mur/sol/autres objets). Désactivable via le panneau ou Alt. */
+  snapEnabled: boolean
   /** Entités vivantes enregistrées par <Editable> (clé = id). */
   registry: Map<string, EditableEntry>
   /** Buffer des surcharges en cours (seedé depuis le JSON). `save()` l'écrit tel quel. */
@@ -58,6 +60,7 @@ interface EditorStore {
   select: (id: string | null) => void
   setGizmoMode: (m: GizmoMode) => void
   setDragging: (v: boolean) => void
+  setSnapEnabled: (v: boolean) => void
   register: (entry: EditableEntry) => void
   unregister: (id: string) => void
   /** Fusionne un delta de surcharge pour une entité (transform et/ou matériau). */
@@ -71,6 +74,7 @@ export const useEditorStore = create<EditorStore>((set, get) => ({
   selectedId: null,
   gizmoMode: 'translate',
   isDragging: false,
+  snapEnabled: true,
   registry: new Map(),
   overrides: { ...INITIAL_OVERRIDES },
 
@@ -79,6 +83,7 @@ export const useEditorStore = create<EditorStore>((set, get) => ({
   select: (id) => set({ selectedId: id }),
   setGizmoMode: (m) => set({ gizmoMode: m }),
   setDragging: (v) => set({ isDragging: v }),
+  setSnapEnabled: (v) => set({ snapEnabled: v }),
 
   register: (entry) =>
     set((s) => {

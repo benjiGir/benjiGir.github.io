@@ -106,6 +106,14 @@ function EditorControls() {
           useEditorStore.getState().setGizmoMode(v)
         },
       },
+      snap: {
+        label: 'snap auto (Alt = off)',
+        value: useEditorStore.getState().snapEnabled,
+        onChange: (v: boolean, _p: string, ctx: LevaCtx) => {
+          if (ctx.initial) return
+          useEditorStore.getState().setSnapEnabled(v)
+        },
+      },
       position: {
         value: seed?.position ?? ([0, 0, 0] as Vec3),
         step: 0.01,
