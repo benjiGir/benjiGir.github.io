@@ -1,112 +1,89 @@
-import { useRef, useState } from 'react'
-import { useFrame } from '@react-three/fiber'
+import { useState } from 'react'
+import type { ThreeEvent } from '@react-three/fiber'
 import { Html } from '@react-three/drei'
-import * as THREE from 'three'
 import { usePowerStore } from '@/store/usePowerStore'
+import { useEditorStore } from '@/editor/useEditorStore'
 import { playClick } from '@/lib/audio'
 import Editable from '@/editor/Editable'
+import { TowerModel } from './TowerModel'
 
 // ─── Tower ────────────────────────────────────────────────────────────────────
+// Tour PC : modèle GLB (Sketchfab). Le GLB n'a ni bouton ni LED repérables par nom (57 meshes
+// `defaultMaterial_*` génériques) : pour l'instant on reste simple — TOUTE la tour est cliquable
+// (clic → allume/éteint). Un bouton power + une LED dédiés seront recalés plus tard sur la vraie
+// façade du modèle.
+
+// ── Transform du GLB — À AJUSTER À L'ŒIL ────────────────────────────────────────
+// Scale calé sur la HAUTEUR réelle du modèle (bbox ~10.63 d'unités de haut → 0.44 cible). Façade
+// supposée côté +Z ; changer MODEL_ROTATION_Y (Math.PI / 2, Math.PI, -Math.PI / 2) si elle ne
+// regarde pas la pièce. MODEL_POSITION pose la base et la façade là où était l'ancien boîtier.
+const MODEL_SCALE = 0.44 / 10.63
+const MODEL_POSITION: readonly [number, number, number] = [0.0066, -0.2294, 0.19]
+const MODEL_ROTATION_Y = 0
+
+// Info-bulle au survol — repère local de l'Editable, au-dessus de la tour (à ajuster à l'œil).
+const TOOLTIP_POSITION: readonly [number, number, number] = [0, 0.28, 0.18]
 
 export function Tower() {
   const [hovered, setHovered] = useState(false)
   const power = usePowerStore((s) => s.power)
   const pressPower = usePowerStore((s) => s.pressPower)
-  const ledMatRef = useRef<THREE.MeshStandardMaterial>(null)
+  const editing = useEditorStore((s) => s.enabled)
 
-  const ledColor = '#00ff44'
-  // Clignotement façon POST : uniquement pendant le démarrage
-  const isBooting = power === 'bios' || power === 'booting'
-  // Bouton power inerte pendant toute transition en cours (démarrage ou extinction)
-  const isTransitioning = isBooting || power === 'shuttingDown'
+  // Cliquable sauf : pendant une transition (démarrage/extinction), et en mode éditeur — sinon le
+  // clic-power volerait la sélection du gizmo de l'<Editable> (toute la tour étant cliquable).
+  const isTransitioning = power === 'bios' || power === 'booting' || power === 'shuttingDown'
+  const interactive = !isTransitioning && !editing
 
-  useFrame(({ clock }, delta) => {
-    if (!ledMatRef.current) return
-    if (isBooting) {
-      // Clignotement temporel (basé sur l'horloge, pas sur le delta/frame-rate) pour rester
-      // cohérent quel que soit le fps de la machine.
-      ledMatRef.current.emissiveIntensity = Math.sin(clock.elapsedTime * 9) > 0 ? 5 : 0
-    } else {
-      const target = power === 'on' ? 3 : 0
-      ledMatRef.current.emissiveIntensity = THREE.MathUtils.lerp(
-        ledMatRef.current.emissiveIntensity,
-        target,
-        1 - Math.exp(-delta * 4)
-      )
-    }
-  })
+  function handleClick(e: ThreeEvent<MouseEvent>) {
+    e.stopPropagation()
+    playClick()
+    pressPower()
+  }
 
   return (
     <Editable id="tower" label="Tour" position={[0.48, 0.97, -0.17]}>
-      <mesh name="Tower_Body" castShadow receiveShadow>
-        <boxGeometry args={[0.18, 0.44, 0.38]} />
-        <meshStandardMaterial color="#1e1e1e" roughness={0.5} metalness={0.3} />
-      </mesh>
-      {/* Bouton power — face avant. Allume depuis l'arrêt, éteint depuis l'allumage. */}
-      <mesh
-        name="Tower_PowerButton"
-        position={[0, 0.12, 0.193]}
-        rotation={[Math.PI / 2, 0, 0]}
-        onClick={
-          !isTransitioning
-            ? () => {
-                playClick()
-                pressPower()
-              }
-            : undefined
-        }
-        onPointerOver={() => {
-          if (!isTransitioning) document.body.style.cursor = 'pointer'
+      <group
+        position={MODEL_POSITION}
+        rotation={[0, MODEL_ROTATION_Y, 0]}
+        scale={MODEL_SCALE}
+        onClick={interactive ? handleClick : undefined}
+        onPointerOver={(e) => {
+          if (!interactive) return
+          e.stopPropagation()
+          document.body.style.cursor = 'pointer'
           setHovered(true)
         }}
         onPointerOut={() => {
           document.body.style.cursor = 'auto'
           setHovered(false)
         }}
-        castShadow
       >
-        <cylinderGeometry args={[0.012, 0.012, 0.008, 16]} />
-        <meshStandardMaterial
-          color={hovered && !isTransitioning ? '#ffffff' : '#cccccc'}
-          roughness={0.2}
-          metalness={0.9}
-          emissive={hovered && !isTransitioning ? '#ffffff' : '#000000'}
-          emissiveIntensity={hovered && !isTransitioning ? 0.4 : 0}
-        />
-        {/* Info-bulle au survol — indique l'action effectuée par le bouton */}
-        {hovered && !isTransitioning && (
-          <Html position={[0, 0, -0.05]} center style={{ pointerEvents: 'none' }}>
-            <div
-              style={{
-                padding: '4px 9px',
-                borderRadius: 6,
-                background: 'rgba(0,0,0,0.75)',
-                backdropFilter: 'blur(6px)',
-                WebkitBackdropFilter: 'blur(6px)',
-                border: '1px solid rgba(255,255,255,0.12)',
-                color: 'rgba(255,255,255,0.9)',
-                fontSize: 10,
-                fontWeight: 500,
-                letterSpacing: 0.3,
-                whiteSpace: 'nowrap',
-                userSelect: 'none',
-              }}
-            >
-              {power === 'off' ? 'Allumer' : 'Éteindre'}
-            </div>
-          </Html>
-        )}
-      </mesh>
-      {/* LED — face avant */}
-      <mesh name="Tower_LED" position={[0.05, 0.12, 0.193]}>
-        <sphereGeometry args={[0.008, 12, 12]} />
-        <meshStandardMaterial
-          ref={ledMatRef}
-          color={ledColor}
-          emissive={ledColor}
-          emissiveIntensity={0}
-        />
-      </mesh>
+        <TowerModel />
+      </group>
+      {/* Info-bulle au survol — indique l'action du clic */}
+      {hovered && interactive && (
+        <Html position={TOOLTIP_POSITION} center style={{ pointerEvents: 'none' }}>
+          <div
+            style={{
+              padding: '4px 9px',
+              borderRadius: 6,
+              background: 'rgba(0,0,0,0.75)',
+              backdropFilter: 'blur(6px)',
+              WebkitBackdropFilter: 'blur(6px)',
+              border: '1px solid rgba(255,255,255,0.12)',
+              color: 'rgba(255,255,255,0.9)',
+              fontSize: 10,
+              fontWeight: 500,
+              letterSpacing: 0.3,
+              whiteSpace: 'nowrap',
+              userSelect: 'none',
+            }}
+          >
+            {power === 'off' ? 'Allumer' : 'Éteindre'}
+          </div>
+        </Html>
+      )}
     </Editable>
   )
 }
