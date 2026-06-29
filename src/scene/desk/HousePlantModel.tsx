@@ -25,7 +25,7 @@ type GLTFResult = GLTF & {
   }
 }
 
-export function HousePlant(props: IntrinsicElements['group']) {
+export function HousePlantModel(props: IntrinsicElements['group']) {
   const { nodes, materials } = useGLTF('/models/houseplant.opt.glb') as unknown as GLTFResult
   return (
     <group {...props} dispose={null}>

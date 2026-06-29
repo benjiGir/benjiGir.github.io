@@ -1,7 +1,7 @@
 import { Geometry, Base, Subtraction } from '@react-three/csg'
 import * as THREE from 'three'
 import Editable from '@/editor/Editable'
-import {HousePlant} from "@/scene/desk/HousePlant.tsx";
+import {HousePlantModel} from "@/scene/desk/HousePlantModel.tsx";
 
 // ─── Room ─────────────────────────────────────────────────────────────────────
 
@@ -119,7 +119,7 @@ export function Room() {
 
       {/* ── Plante d'intérieur — coin gauche-fond ── */}
       <Editable id="plant" label="Plante">
-        <HousePlant />
+        <HousePlantModel />
       </Editable>
 
       {/* ── Fenêtre sur le mur gauche ── */}
