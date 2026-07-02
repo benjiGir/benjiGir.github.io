@@ -51,6 +51,10 @@ const MODEL_POSITION: readonly [number, number, number] = [0, 0, 0.013]
 const HTML_SCALE = new Vector3(0.0215, 0.017, 1)
 const HTML_POSITION: readonly [number, number, number] = [0, 1.13, 0.025]
 
+// Intensité crête du glow d'appoint émis par la dalle dans la pièce (à `target` max, cf. useFrame
+// ci-dessous) — faible volontairement, c'est un rattrapage de contraste local, pas un fill.
+const SCREEN_GLOW_MAX = 0.6
+
 export function Monitor() {
   const power = usePowerStore((s) => s.power)
   const setDockedEl = useScreenStore((s) => s.setDockedEl)
@@ -58,6 +62,8 @@ export function Monitor() {
 
   const { nodes, materials } = useGLTF(MODEL_URL) as unknown as GLTFResult
   const screenMatRef = useRef<THREE.MeshStandardMaterial>(null)
+  // Glow d'appoint de la dalle dans la pièce — même cible/lerp que l'émissive, voir useFrame.
+  const screenGlowRef = useRef<THREE.PointLight>(null)
 
   useFrame((_, delta) => {
     if (!screenMatRef.current) return
@@ -68,6 +74,15 @@ export function Monitor() {
       target,
       1 - Math.exp(-delta * 2.5)
     )
+    if (screenGlowRef.current) {
+      // Portée volontairement faible : un glow d'appoint près de l'écran, pas une source qui
+      // remplit la pièce. SCREEN_GLOW_MAX dose l'intensité crête (cf. constante en tête de fichier).
+      screenGlowRef.current.intensity = THREE.MathUtils.lerp(
+        screenGlowRef.current.intensity,
+        target * SCREEN_GLOW_MAX,
+        1 - Math.exp(-delta * 2.5)
+      )
+    }
   })
 
   // Tout le moniteur (modèle GLB + portail HTML) dans un seul <Editable> pour le rendre déplaçable
@@ -75,6 +90,17 @@ export function Monitor() {
   // <Hotspot> interne s'efface en mode édition (cf. Hotspot.tsx).
   return (
     <Editable id="monitor" label="Moniteur" position={[0, -0.1, 0]}>
+      {/* Glow d'appoint de la dalle — léger pointLight devant l'écran, pas une lumière qui remplit
+          la pièce (cf. SCREEN_GLOW_MAX). Pas de castShadow : juste du contraste local, le coût
+          d'une ombre temps réel ne se justifie pas pour ce rattrapage. */}
+      <pointLight
+        ref={screenGlowRef}
+        position={[0, 1.13, 0.15]}
+        color="#a0b4ff"
+        intensity={0}
+        distance={1.4}
+        decay={2}
+      />
       {/* Moniteur GLB — cliquable : zoom caméra sur l'écran (POI 'screen') */}
       <Hotspot poi="screen" label="Zoomer sur l'écran" position={[0, 1.13, 0]}>
         <group position={MODEL_POSITION} scale={MODEL_SCALE} dispose={null}>

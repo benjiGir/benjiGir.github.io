@@ -6,10 +6,11 @@ Source: https://sketchfab.com/3d-models/desk-lamp-7377ec591df04445a1aae370017aaa
 Title: Desk lamp
 */
 
+import { useEffect, useMemo } from 'react'
 import * as THREE from 'three'
 import { useGLTF } from '@react-three/drei'
 import { GLTF } from 'three-stdlib'
-import IntrinsicElements = React.JSX.IntrinsicElements;
+import type { ThreeElements } from '@react-three/fiber'
 
 type GLTFResult = GLTF & {
   nodes: {
@@ -55,8 +56,33 @@ type GLTFResult = GLTF & {
   }
 }
 
-export function DeskLampModel(props: IntrinsicElements['group']) {
+type DeskLampModelProps = ThreeElements['group'] & {
+  /** Lampe allumée/éteinte — pilote l'intensité du spot et l'émissive de l'ampoule. Le wrapper
+   * (DeskLamp.tsx) lit le store et passe ce prop ; ce composant généré reste "dumb". */
+  lit?: boolean
+}
+
+export function DeskLampModel({ lit = true, ...props }: DeskLampModelProps) {
   const { nodes, materials } = useGLTF('/models/desklamp.opt.glb') as unknown as GLTFResult
+
+  // Clone du matériau de l'ampoule pour piloter son émissive selon `lit` sans muter l'objet
+  // partagé par le cache de useGLTF — garde texture/couleur/roughness d'origine. Recalculé au
+  // changement de `lit` (clic, donc peu fréquent) plutôt que muté en dehors du useMemo.
+  // `05_-_Default` peut être absent de `materials` selon le résultat de l'optimisation GLB
+  // (gltf-transform fusionne parfois ce matériau dans un autre) : fallback sur un verre/dôme
+  // neutre plutôt que de planter sur `.clone()` d'un undefined.
+  const bulbMaterial = useMemo(() => {
+    const source = materials['05_-_Default']
+    const mat = source
+      ? source.clone()
+      : new THREE.MeshStandardMaterial({ color: '#fffaf0', roughness: 0.25, metalness: 0 })
+    mat.emissive = new THREE.Color('#ffd9a0')
+    mat.emissiveIntensity = lit ? 1.4 : 0
+    return mat
+  }, [materials, lit])
+
+  useEffect(() => () => bulbMaterial.dispose(), [bulbMaterial])
+
   return (
     <group {...props} dispose={null}>
       <group rotation={[-Math.PI / 2, 0, 0]} scale={0.0592}>
@@ -161,7 +187,7 @@ export function DeskLampModel(props: IntrinsicElements['group']) {
               castShadow
               receiveShadow
               geometry={nodes['Sphere020_05_-_Default_0'].geometry}
-              material={materials['05_-_Default']}
+              material={bulbMaterial}
             />
             <mesh
               castShadow
@@ -169,17 +195,21 @@ export function DeskLampModel(props: IntrinsicElements['group']) {
               geometry={nodes.Sphere020_Ceramic_0.geometry}
               material={materials.Ceramic}
             />
-            <spotLight
-              position={[0, -0, 0]}
-              target-position={[0, -1, 0.3]}
-              color="#ffd9a0"
-              intensity={2.5}
-              angle={0.5}
-              penumbra={0.6}
-              decay={2}
-              distance={1.5}
-              castShadow
-            />
+            {/* Spot motivé par l'ampoule — coupé net quand `lit` est false (pas de lerp ici, le
+                wrapper peut en ajouter un si besoin ; ce composant reste un simple on/off). */}
+            {lit && (
+              <spotLight
+                position={[0, -0, 0]}
+                target-position={[0, -1, 0.3]}
+                color="#ffd9a0"
+                intensity={2.5}
+                angle={0.5}
+                penumbra={0.6}
+                decay={2}
+                distance={1.5}
+                castShadow
+              />
+            )}
           </group>
           <mesh
             castShadow
