@@ -16,7 +16,7 @@ type GLTFResult = GLTF & {
 }
 
 export function ChairModel(props: IntrinsicElements['group']) {
-  const { nodes, materials } = useGLTF('/models/chair.glb') as unknown as GLTFResult
+  const { nodes, materials } = useGLTF('/models/chair.opt.glb') as unknown as GLTFResult
   return (
     <group {...props} dispose={null}>
       <mesh
@@ -41,4 +41,4 @@ export function ChairModel(props: IntrinsicElements['group']) {
   )
 }
 
-useGLTF.preload('/models/chair.glb')
+useGLTF.preload('/models/chair.opt.glb')
