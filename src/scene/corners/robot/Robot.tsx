@@ -3,6 +3,7 @@ import { useFrame, useThree } from '@react-three/fiber'
 import * as THREE from 'three'
 import Hotspot from '@/scene/camera/Hotspot'
 import { useCameraStore } from '@/store/useCameraStore'
+import { ROBOT_MAT_HEIGHT } from '@/scene/roomLayout'
 import { playServo } from '@/lib/audio'
 import { RobotModel } from './RobotModel'
 import type { RobotModelHandle } from './types'
@@ -61,7 +62,7 @@ export default function Robot() {
   return (
     <Hotspot poi="robot" label="Robot NAO">
       <group onClick={handleClick}>
-        <RobotModel ref={modelRef} />
+        <RobotModel ref={modelRef} groundY={ROBOT_MAT_HEIGHT} />
       </group>
     </Hotspot>
   )

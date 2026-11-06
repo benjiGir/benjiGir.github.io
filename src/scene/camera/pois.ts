@@ -64,9 +64,9 @@ export const POIS: Record<PoiId, PoiConfig> = {
     maxDist: 1.75,
   },
   robot: {
-    pos: offset(robotMat, -0.27, 1.39, 1.54),
-    target: offset(robotMat, 0, 0.27, 0),
-    minDist: 1.35,
-    maxDist: 2.12,
+    pos: offset(robotMat, -0.34, 1.15, 1.36),
+    target: offset(robotMat, -0.12, 0.28, 0),
+    minDist: 1.18,
+    maxDist: 2.02,
   },
 }

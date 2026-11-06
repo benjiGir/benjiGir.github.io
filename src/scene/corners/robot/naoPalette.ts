@@ -1,0 +1,5 @@
+export const SHELL = '#e9e8e4'
+export const ACCENT = '#2857a1'
+export const JOINT = '#30363f'
+export const SEAM = '#747f90'
+export const LIGHT = '#91d5ff'

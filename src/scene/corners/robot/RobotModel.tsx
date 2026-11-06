@@ -12,21 +12,12 @@ import { Head } from './parts/Head'
 import { Arm } from './parts/Arm'
 import { Leg } from './parts/Leg'
 import { TargetMarker } from './parts/TargetMarker'
+import { Torso } from './parts/Torso'
 import type { GazeTarget, RobotModelHandle } from './types'
 
 // ─── Constantes ────────────────────────────────────────────────────────────────
 
 const STEP_DURATION = 0.6 // secondes par instruction (cf. PLAN.md)
-// Échelle globale du robot : les primitives ci-dessous sont modélisées pour un robot d'environ
-// 40cm ; ce facteur le porte aux ~60cm visés (gabarit façon NAO).
-const ROBOT_SCALE = 1.5
-// Décalage vertical (avant mise à l'échelle) pour que les pieds touchent le sol (y=0 monde).
-const ROBOT_Y_OFFSET = 0.045
-
-// Couleurs
-const BODY_COLOR = '#f4f4f6'
-const ACCENT_COLOR = '#2b6cb0'
-const LED_COLOR = '#3ddc84'
 
 // ─── RobotModel ──────────────────────────────────────────────────────────────
 //
@@ -39,9 +30,11 @@ const LED_COLOR = '#3ddc84'
 // look-at externe) et `gaze` une référence mutable `{ yaw, pitch }` que l'appelant peut écrire
 // chaque frame pour orienter le regard (cf. commentaire dans `parts/Head.tsx`).
 
-const RobotModel = forwardRef<RobotModelHandle>(function RobotModel(_, ref) {
+const RobotModel = forwardRef<RobotModelHandle, { groundY?: number }>(function RobotModel(
+  { groundY = 0 },
+  ref
+) {
   const groupRef = useRef<THREE.Group>(null)
-  const bodyRef = useRef<THREE.Group>(null)
   const headRef = useRef<THREE.Group>(null)
   const ledMatRef = useRef<THREE.MeshStandardMaterial>(null)
   const walkPhase = useRef(0)
@@ -149,22 +142,14 @@ const RobotModel = forwardRef<RobotModelHandle>(function RobotModel(_, ref) {
       walkPhase.current = THREE.MathUtils.lerp(walkPhase.current, 0, 1 - Math.exp(-delta * 4))
     }
 
-    // ── Respiration idle (scale léger sur le buste) + échelle globale + offset au sol ──
-    const body = bodyRef.current
-    if (body) {
-      const breathe = 1 + Math.sin(state.clock.elapsedTime * 1.6) * 0.012
-      body.scale.set(ROBOT_SCALE, ROBOT_SCALE * breathe, ROBOT_SCALE)
-      body.position.y = ROBOT_Y_OFFSET * ROBOT_SCALE
-    }
-
     // ── Danse : petite rotation/sautillement temporaire ──
     if (danceAnim.current > 0) {
       danceAnim.current -= delta
       const t = Math.max(danceAnim.current, 0)
       group.rotation.y += Math.sin(t * 14) * 0.3
-      group.position.y = Math.abs(Math.sin(t * 10)) * 0.03
+      group.position.y = groundY + Math.abs(Math.sin(t * 10)) * 0.03
     } else {
-      group.position.y = 0
+      group.position.y = groundY
     }
 
     // ── LED poitrine : pulsation douce, plus rapide pendant l'exécution ──
@@ -182,29 +167,13 @@ const RobotModel = forwardRef<RobotModelHandle>(function RobotModel(_, ref) {
     <>
       <TargetMarker />
       <group ref={groupRef} onClick={handleClick}>
-        <group ref={bodyRef}>
-          {/* Buste */}
-          <mesh position={[0, 0.155, 0]} castShadow receiveShadow>
-            <capsuleGeometry args={[0.075, 0.09, 8, 16]} />
-            <meshStandardMaterial color={BODY_COLOR} roughness={0.4} metalness={0.1} />
-          </mesh>
-          {/* LED poitrine */}
-          <mesh position={[0, 0.165, 0.075]}>
-            <circleGeometry args={[0.018, 16]} />
-            <meshStandardMaterial
-              ref={ledMatRef}
-              color={LED_COLOR}
-              emissive={LED_COLOR}
-              emissiveIntensity={0.6}
-              side={THREE.DoubleSide}
-            />
-          </mesh>
-          {/* Bassin */}
-          <mesh position={[0, 0.07, 0]} castShadow receiveShadow>
-            <capsuleGeometry args={[0.06, 0.02, 8, 16]} />
-            <meshStandardMaterial color={ACCENT_COLOR} roughness={0.5} metalness={0.15} />
-          </mesh>
-
+        <mesh position={[0, 0.29, 0.02]}>
+          <boxGeometry args={[0.29, 0.58, 0.25]} />
+          <meshBasicMaterial visible={false} />
+        </mesh>
+        {/* false arrête la descente du rayon dans les pièces décoratives. */}
+        <group raycast={() => false}>
+          <Torso statusMaterial={ledMatRef} />
           <Head headRef={headRef} gazeRef={gazeRef} failTrigger={failTrigger} />
           <Arm side="left" walkPhase={walkPhase} greetTrigger={greetTrigger} />
           <Arm side="right" walkPhase={walkPhase} greetTrigger={greetTrigger} />

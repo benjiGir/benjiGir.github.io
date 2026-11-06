@@ -4,7 +4,7 @@ import Workbench from '@/scene/corners/workbench/Workbench'
 import RetroCorner from '@/scene/corners/retro/RetroCorner'
 import LegoCorner from '@/scene/corners/lego/LegoCorner'
 import Editable from '@/editor/Editable'
-import { DESK_POSITION, ROBOT_MAT_CENTER } from '@/scene/roomLayout'
+import { DESK_POSITION, ROBOT_MAT_CENTER, ROBOT_MAT_HEIGHT } from '@/scene/roomLayout'
 import { Floor } from './Floor'
 import { Room } from './Room'
 import { DeskModel } from './DeskModel'
@@ -31,8 +31,8 @@ export default function DeskScene() {
         <DeskLamp />
         <Chair />
       </group>
-      <mesh position={[ROBOT_MAT_CENTER[0], 0.004, ROBOT_MAT_CENTER[1]]} receiveShadow>
-        <boxGeometry args={[1.34, 0.008, 1.34]} />
+      <mesh position={[ROBOT_MAT_CENTER[0], ROBOT_MAT_HEIGHT / 2, ROBOT_MAT_CENTER[1]]} receiveShadow>
+        <boxGeometry args={[1.34, ROBOT_MAT_HEIGHT, 1.34]} />
         <meshStandardMaterial color="#526d7c" roughness={0.95} />
       </mesh>
       <Robot />

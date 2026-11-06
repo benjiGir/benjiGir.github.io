@@ -1,10 +1,38 @@
 import { useRef, type MutableRefObject } from 'react'
+import { RoundedBox } from '@react-three/drei'
 import { useFrame } from '@react-three/fiber'
 import * as THREE from 'three'
+import { ACCENT, JOINT, SEAM, SHELL } from '../naoPalette'
 
-const BODY_COLOR = '#f4f4f6'
+const FOREARM_PROFILE = [
+  [0, -0.121],
+  [0.009, -0.121],
+  [0.013, -0.118],
+  [0.018, -0.103],
+  [0.019, -0.093],
+  [0.017, -0.084],
+  [0.013, -0.079],
+  [0, -0.079],
+].map(([radius, y]) => new THREE.Vector2(radius, y))
 
-// ─── Bras ────────────────────────────────────────────────────────────────────
+function Finger({ curl }: { curl: number }) {
+  return (
+    <>
+      <mesh position={[0, -0.003, 0]}>
+        <capsuleGeometry args={[0.005, 0.005, 3, 8]} />
+        <meshStandardMaterial color={SHELL} roughness={0.46} />
+      </mesh>
+      <mesh position={[0, -0.0115, 0]} scale={[1, 0.8, 1]}>
+        <sphereGeometry args={[0.0045, 10, 6]} />
+        <meshStandardMaterial color={SEAM} roughness={0.8} />
+      </mesh>
+      <mesh position={[0, -0.0165, 0]} rotation={[0, 0, curl]}>
+        <capsuleGeometry args={[0.0044, 0.004, 3, 8]} />
+        <meshStandardMaterial color={SHELL} roughness={0.46} />
+      </mesh>
+    </>
+  )
+}
 
 interface ArmProps {
   side: 'left' | 'right'
@@ -53,11 +81,65 @@ export function Arm({ side, walkPhase, greetTrigger }: ArmProps) {
   })
 
   return (
-    <group ref={groupRef} position={[sign * 0.085, 0.16, 0]}>
-      <mesh position={[0, -0.05, 0]} castShadow>
-        <capsuleGeometry args={[0.018, 0.08, 6, 12]} />
-        <meshStandardMaterial color={BODY_COLOR} roughness={0.45} metalness={0.1} />
+    <group ref={groupRef} position={[sign * 0.099, 0.409, 0]}>
+      <mesh position={[-sign * 0.016, 0, 0]} rotation={[0, 0, Math.PI / 2]}>
+        <capsuleGeometry args={[0.018, 0.01, 4, 12]} />
+        <meshStandardMaterial color={JOINT} roughness={0.82} />
       </mesh>
+      <mesh position={[sign * 0.005, 0, 0]} scale={[0.031, 0.033, 0.034]} castShadow>
+        <sphereGeometry args={[1, 24, 16]} />
+        <meshStandardMaterial color={ACCENT} roughness={0.38} />
+      </mesh>
+      <mesh position={[0, -0.035, 0]} scale={[0.82, 1, 1.14]} castShadow>
+        <capsuleGeometry args={[0.018, 0.032, 6, 16]} />
+        <meshStandardMaterial color={SHELL} roughness={0.44} />
+      </mesh>
+      <mesh position={[0, -0.072, 0]} scale={[0.019, 0.014, 0.016]} castShadow>
+        <sphereGeometry args={[1, 16, 10]} />
+        <meshStandardMaterial color={JOINT} roughness={0.82} />
+      </mesh>
+      <mesh scale={[1, 1, 1.18]} castShadow>
+        <latheGeometry args={[FOREARM_PROFILE, 20]} />
+        <meshStandardMaterial color={SHELL} roughness={0.44} />
+      </mesh>
+      <mesh position={[0, -0.127, 0]}>
+        <cylinderGeometry args={[0.009, 0.009, 0.018, 12]} />
+        <meshStandardMaterial color={JOINT} roughness={0.82} />
+      </mesh>
+      <RoundedBox
+        args={[0.022, 0.008, 0.025]}
+        position={[0, -0.126, 0]}
+        radius={0.003}
+        smoothness={1}
+        bevelSegments={1}
+      >
+        <meshStandardMaterial color={SHELL} roughness={0.44} />
+      </RoundedBox>
+      <RoundedBox
+        args={[0.025, 0.022, 0.032]}
+        position={[0, -0.144, 0]}
+        radius={0.008}
+        smoothness={2}
+        bevelSegments={2}
+        castShadow
+      >
+        <meshStandardMaterial color={SHELL} roughness={0.46} />
+      </RoundedBox>
+
+      {/* Deux doigts et un pouce opposé, repliés vers la paume. */}
+      <group position={[0, -0.151, -0.008]}>
+        <Finger curl={-sign * 0.42} />
+      </group>
+      <group position={[0, -0.152, 0.003]}>
+        <Finger curl={-sign * 0.52} />
+      </group>
+      <group
+        position={[-sign * 0.006, -0.144, 0.012]}
+        rotation={[-0.38, 0, -sign * 0.28]}
+        scale={0.8}
+      >
+        <Finger curl={-sign * 0.5} />
+      </group>
     </group>
   )
 }

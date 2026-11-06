@@ -8,5 +8,6 @@ export const DESK_POSITION = [-3.05, 0, -0.6] as const
 export const WORKBENCH_POSITION = [-2.68, 0, -3.61] as const
 export const LEGO_POSITION = [-2.1, 0, 0.74] as const
 export const ROBOT_MAT_CENTER = [1.12, -3.22] as const
+export const ROBOT_MAT_HEIGHT = 0.008
 export const CRT_POSITION = [2.47, 0, -3.62] as const
 export const GUITAR_POSITION = [3.25, 0, -2.6] as const

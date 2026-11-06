@@ -11,7 +11,7 @@ const [GRID_CENTER_X, GRID_CENTER_Z] = cellToWorld((GRID_SIZE - 1) / 2, (GRID_SI
 const GRID_SPAN = (GRID_SIZE - 1) * CELL_SIZE + CELL_SIZE // marge d'une demi-cellule de chaque côté
 
 // Caméra fixe en vue 3/4 plongeante au-dessus de la grille (offset par rapport à son centre)
-const CAMERA_POS: [number, number, number] = [GRID_CENTER_X + 0.5, 1.2, GRID_CENTER_Z - 0.8]
+const CAMERA_POS: [number, number, number] = [GRID_CENTER_X + 0.42, 1.3, GRID_CENTER_Z + 1.46]
 
 // ─── Tapis + grille visuelle ──────────────────────────────────────────────────
 
@@ -77,8 +77,8 @@ export default function RobotPreview() {
     <div style={{ width: '100%', height: 180, flexShrink: 0 }}>
       <Canvas
         dpr={[1, 1.5]}
-        camera={{ position: CAMERA_POS, fov: 32 }}
-        onCreated={({ camera }) => camera.lookAt(GRID_CENTER_X, 0, GRID_CENTER_Z)}
+        camera={{ position: CAMERA_POS, fov: 48 }}
+        onCreated={({ camera }) => camera.lookAt(GRID_CENTER_X, 0.08, GRID_CENTER_Z)}
         gl={{ antialias: true, toneMapping: THREE.ACESFilmicToneMapping }}
       >
         <MiniScene />
