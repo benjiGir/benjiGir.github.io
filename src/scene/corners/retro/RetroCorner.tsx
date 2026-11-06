@@ -3,6 +3,7 @@ import type { ThreeEvent } from '@react-three/fiber'
 import * as THREE from 'three'
 import Hotspot from '@/scene/camera/Hotspot'
 import Editable from '@/editor/Editable'
+import { useEditorStore } from '@/editor/useEditorStore'
 import { useCameraStore } from '@/store/useCameraStore'
 import { CRT_POSITION } from '@/scene/roomLayout'
 import { playClick, playCrtOn } from '@/lib/audio'
@@ -10,19 +11,21 @@ import { createPong } from '@/lib/games/pong'
 import { GAME_WIDTH, GAME_HEIGHT, type GameInputs, type GameModule } from '@/lib/games/types'
 import { SCREEN_TEX_W, SCREEN_TEX_H } from './crtShader'
 import { Cabinet } from './Cabinet'
+import { Console } from './Console'
 import { Tv } from './Tv'
 import { useGameLoop } from './useGameLoop'
 
 // ─── RetroCorner (export) ─────────────────────────────────────────────────────────
 //
 // Coin jeu au fond à droite : meuble bas + TV CRT + console + manette +
-// cartouches. Cliquer la cartouche rouge allume la TV (`playCrtOn`) et démarre Pong, dessiné
+// cartouches. La cartouche Pong et le bouton de la console allument la TV et démarrent le jeu, dessiné
 // dans un canvas 2D hors-écran (`lib/games/pong.ts`) projeté sur l'écran via CanvasTexture +
 // shader CRT (scanlines/vignette/distorsion). Contrôles ↑/↓ actifs uniquement quand le POI
 // 'crt' est actif.
 
 export default function RetroCorner() {
   const activePoi = useCameraStore((s) => s.poi)
+  const editing = useEditorStore((s) => s.enabled)
   const poiActive = activePoi === 'crt'
 
   // État "TV allumée / jeu démarré" — change une seule fois par session (clic cartouche),
@@ -40,8 +43,8 @@ export default function RetroCorner() {
   }, [])
   const ctx2d = useMemo(() => {
     const ctx = canvas.getContext('2d')
-    // Le jeu dessine en 320x240 — on étire le contexte pour remplir la texture suréchantillonnée
-    if (ctx) ctx.scale(SCREEN_TEX_W / GAME_WIDTH, SCREEN_TEX_H / GAME_HEIGHT)
+    // Fixe l'échelle sans la cumuler si React réévalue l'initialisation en développement.
+    ctx?.setTransform(SCREEN_TEX_W / GAME_WIDTH, 0, 0, SCREEN_TEX_H / GAME_HEIGHT, 0, 0)
     return ctx
   }, [canvas])
   const texture = useMemo(() => {
@@ -84,9 +87,12 @@ export default function RetroCorner() {
     }
   }, [poiActive])
 
-  function handleCartridgeClick(e: ThreeEvent<MouseEvent>) {
+  const canStart = poiActive && !on && !editing
+
+  function startGame(e: ThreeEvent<MouseEvent>) {
+    if (!canStart) return
     e.stopPropagation()
-    if (!poiActive || on) return
+    document.body.style.cursor = 'auto'
     playClick()
     playCrtOn()
     setOn(true)
@@ -107,7 +113,8 @@ export default function RetroCorner() {
     <Hotspot poi="crt" label="Coin jeu" position={CRT_POSITION} rotation={[0, -0.15, 0]}>
       <Editable id="crt" label="Coin jeu (CRT)">
         <Cabinet />
-        <Tv texture={texture} on={on} onCartridgeClick={handleCartridgeClick} />
+        <Tv texture={texture} on={on} />
+        <Console on={on} canStart={canStart} onStart={startGame} />
       </Editable>
     </Hotspot>
   )

@@ -52,9 +52,9 @@ export const POIS: Record<PoiId, PoiConfig> = {
     maxDist: 1.93,
   },
   crt: {
-    pos: offset(CRT_POSITION, -0.37, 1.18, 1.32),
-    target: offset(CRT_POSITION, -0.13, 0.75, 0.17),
-    minDist: 0.9,
+    pos: offset(CRT_POSITION, -0.28, 1.23, 1.48),
+    target: offset(CRT_POSITION, -0.06, 0.69, 0.09),
+    minDist: 1.02,
     maxDist: 1.65,
   },
   legos: {
