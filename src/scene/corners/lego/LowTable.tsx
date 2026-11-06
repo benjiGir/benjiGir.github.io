@@ -1,4 +1,4 @@
-import { TABLE_TOP_Y, TABLETOP_THICKNESS } from './bricks'
+import { TABLE_TOP_Y, TABLETOP_DEPTH, TABLETOP_THICKNESS, TABLETOP_WIDTH } from './bricks'
 
 // ─── Table basse ───────────────────────────────────────────────────────────────
 
@@ -8,7 +8,7 @@ export function LowTable() {
     <group>
       {/* Plateau — top en TABLE_TOP_Y */}
       <mesh position={[0, TABLE_TOP_Y - TABLETOP_THICKNESS / 2, 0]} castShadow receiveShadow>
-        <boxGeometry args={[0.9, TABLETOP_THICKNESS, 0.6]} />
+        <boxGeometry args={[TABLETOP_WIDTH, TABLETOP_THICKNESS, TABLETOP_DEPTH]} />
         <meshStandardMaterial color="#8a7257" roughness={0.6} metalness={0.05} />
       </mesh>
       {/* Pieds — du sol jusqu'au dessous du plateau */}

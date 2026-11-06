@@ -4,6 +4,7 @@ import * as THREE from 'three'
 import Hotspot from '@/scene/camera/Hotspot'
 import Editable from '@/editor/Editable'
 import { useCameraStore } from '@/store/useCameraStore'
+import { CRT_POSITION } from '@/scene/roomLayout'
 import { playClick, playCrtOn } from '@/lib/audio'
 import { createPong } from '@/lib/games/pong'
 import { GAME_WIDTH, GAME_HEIGHT, type GameInputs, type GameModule } from '@/lib/games/types'
@@ -14,7 +15,7 @@ import { useGameLoop } from './useGameLoop'
 
 // ─── RetroCorner (export) ─────────────────────────────────────────────────────────
 //
-// Coin jeu (mur du fond gauche, x≈-2.4, z≈-3.6) : meuble bas + TV CRT + console + manette +
+// Coin jeu au fond à droite : meuble bas + TV CRT + console + manette +
 // cartouches. Cliquer la cartouche rouge allume la TV (`playCrtOn`) et démarre Pong, dessiné
 // dans un canvas 2D hors-écran (`lib/games/pong.ts`) projeté sur l'écran via CanvasTexture +
 // shader CRT (scanlines/vignette/distorsion). Contrôles ↑/↓ actifs uniquement quand le POI
@@ -103,8 +104,8 @@ export default function RetroCorner() {
   })
 
   return (
-    <Hotspot poi="crt" label="Coin jeu" position={[-2.4, 0, -3.6]}>
-      <Editable id="crt" label="Coin jeu (CRT)" rotation={[0, -0.5, 0]}>
+    <Hotspot poi="crt" label="Coin jeu" position={CRT_POSITION} rotation={[0, -0.15, 0]}>
+      <Editable id="crt" label="Coin jeu (CRT)">
         <Cabinet />
         <Tv texture={texture} on={on} onCartridgeClick={handleCartridgeClick} />
       </Editable>

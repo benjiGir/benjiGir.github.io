@@ -32,6 +32,8 @@ export const COLORS = {
 // (sur laquelle reposent la plaque verte et les briques), donc le mesh du plateau est centré
 // un demi-épaisseur plus bas.
 export const TABLETOP_THICKNESS = 0.03
+export const TABLETOP_WIDTH = 0.9
+export const TABLETOP_DEPTH = 0.6
 
 // ─── Description d'une brique ───────────────────────────────────────────────────
 //

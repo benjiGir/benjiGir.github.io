@@ -4,7 +4,7 @@ const SOLDER_STAND_COLOR = '#4b4b4b'
 
 export function SolderingIron() {
   return (
-    <group position={[0.28, 0.77, 0.08]}>
+    <group position={[0.405, 0.76, 0.048]}>
       {/* Support (anneau métallique sur socle) */}
       <mesh position={[0, 0.012, 0]} castShadow receiveShadow>
         <cylinderGeometry args={[0.035, 0.04, 0.02, 16]} />
@@ -18,10 +18,10 @@ export function SolderingIron() {
       <group position={[0.01, 0.05, 0]} rotation={[0, 0, Math.PI / 5]}>
         <mesh position={[0, 0.07, 0]} castShadow>
           <cylinderGeometry args={[0.012, 0.014, 0.16, 12]} />
-          <meshStandardMaterial color="#222" roughness={0.6} />
+          <meshStandardMaterial color="#374d52" roughness={0.6} />
         </mesh>
         {/* Panne (pointe métallique) */}
-        <mesh position={[0, -0.02, 0]} castShadow>
+        <mesh position={[0, -0.02, 0]} rotation={[0, 0, Math.PI]} castShadow>
           <coneGeometry args={[0.005, 0.05, 8]} />
           <meshStandardMaterial color="#cfcfcf" metalness={0.8} roughness={0.2} />
         </mesh>

@@ -199,8 +199,8 @@ export function DeskLampModel({ lit = true, ...props }: DeskLampModelProps) {
                 wrapper peut en ajouter un si besoin ; ce composant reste un simple on/off). */}
             {lit && (
               <spotLight
-                position={[0, -0, 0]}
-                target-position={[0, -1, 0.3]}
+                position={[1, -0, 0]}
+                target-position={[1, -1, 0.3]}
                 color="#ffd9a0"
                 intensity={2.5}
                 angle={0.5}

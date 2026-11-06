@@ -11,6 +11,7 @@ interface HotspotProps {
   label: string
   /** Position du groupe enveloppant les meshes de l'objet. */
   position?: readonly [number, number, number]
+  rotation?: readonly [number, number, number]
   /** Callback optionnel déclenché en plus du focus caméra (ex. son spécifique). */
   onFocus?: () => void
   children: ReactNode
@@ -21,7 +22,7 @@ interface HotspotProps {
  * pointer + tooltip façon Tower) et le clic → focus caméra sur le POI associé.
  * Désactivé quand un POI est déjà actif (un seul niveau de zoom à la fois).
  */
-export default function Hotspot({ poi, label, position, onFocus, children }: HotspotProps) {
+export default function Hotspot({ poi, label, position, rotation, onFocus, children }: HotspotProps) {
   const [hovered, setHovered] = useState(false)
   const activePoi = useCameraStore((s) => s.poi)
   const focusOn = useCameraStore((s) => s.focusOn)
@@ -33,7 +34,7 @@ export default function Hotspot({ poi, label, position, onFocus, children }: Hot
   // basculement) et c'est le même type <group> dans les deux cas, donc le contenu n'est PAS remonté
   // (état des coins et overrides préservés).
   if (editing) {
-    return <group position={position}>{children}</group>
+    return <group position={position} rotation={rotation}>{children}</group>
   }
 
   const enabled = activePoi === 'overview'
@@ -48,6 +49,7 @@ export default function Hotspot({ poi, label, position, onFocus, children }: Hot
   return (
     <group
       position={position}
+      rotation={rotation}
       onClick={enabled ? handleClick : undefined}
       onPointerOver={() => {
         if (enabled) document.body.style.cursor = 'pointer'

@@ -71,6 +71,7 @@ export default function FreecamController() {
   const looking = useRef(false)
   const yaw = useRef(0)
   const pitch = useRef(0)
+  const wasEnabled = useRef(false)
 
   // À l'activation : initialise yaw/pitch depuis l'orientation courante de la caméra et
   // désactive CameraControls pour qu'il ne se batte pas avec la freecam.
@@ -80,6 +81,7 @@ export default function FreecamController() {
     const controls = store.getState().controls as unknown as ControlsLike | null
 
     if (enabled) {
+      wasEnabled.current = true
       tmpEuler.setFromQuaternion(camera.quaternion, 'YXZ')
       yaw.current = tmpEuler.y
       pitch.current = tmpEuler.x
@@ -87,7 +89,8 @@ export default function FreecamController() {
       return
     }
 
-    if (controls) {
+    if (controls && wasEnabled.current) {
+      wasEnabled.current = false
       tmpForward3D.set(0, 0, -1).applyQuaternion(camera.quaternion)
       tmpLookTarget.copy(camera.position).addScaledVector(tmpForward3D, 1)
       void controls.setLookAt(

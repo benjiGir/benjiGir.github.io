@@ -4,7 +4,7 @@ const MULTIMETER_COLOR = '#d97706'
 
 export function Multimeter() {
   return (
-    <group position={[0.45, 0.77, -0.12]} rotation={[0, -0.3, 0]}>
+    <group position={[0.572, 0.77, 0.182]} rotation={[0, -0.23, 0]}>
       <mesh castShadow receiveShadow>
         <boxGeometry args={[0.09, 0.02, 0.13]} />
         <meshStandardMaterial color={MULTIMETER_COLOR} roughness={0.6} />

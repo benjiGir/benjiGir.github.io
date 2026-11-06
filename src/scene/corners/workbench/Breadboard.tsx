@@ -58,7 +58,7 @@ export function Breadboard() {
   )
 
   return (
-    <group position={[-0.32, 0.766, -0.08]}>
+    <group position={[-0.435, 0.771, 0.1]}>
       {/* Plaque */}
       <mesh castShadow receiveShadow>
         <boxGeometry args={[0.22, 0.012, 0.14]} />

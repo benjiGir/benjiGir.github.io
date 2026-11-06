@@ -2,13 +2,14 @@ import { useRef } from 'react'
 import Hotspot from '@/scene/camera/Hotspot'
 import Editable from '@/editor/Editable'
 import { useCameraStore } from '@/store/useCameraStore'
+import { GUITAR_POSITION } from '@/scene/roomLayout'
 import { GuitarModel } from './GuitarModel'
 import { SimonPanel } from './SimonPanel'
 import { STRING_COUNT } from './constants'
 
 // ─── Guitar (export) ──────────────────────────────────────────────────────────
 //
-// Guitare acoustique sur stand, coin musique (mur gauche, juste après la fenêtre).
+// Guitare électrique sur stand entre le CRT et le lit.
 // Le Hotspot englobant gère le focus caméra (POI 'guitar') ; une fois le POI actif, chaque
 // corde devient cliquable individuellement (pince + vibration) et le panneau Simon apparaît.
 //
@@ -22,7 +23,7 @@ export default function Guitar() {
   const poiActive = activePoi === 'guitar'
 
   return (
-    <Hotspot poi="guitar" label="Guitare" position={[-3.85, 0, 2.35]}>
+    <Hotspot poi="guitar" label="Guitare" position={GUITAR_POSITION} rotation={[0, -1.85, 0]}>
       <Editable id="guitar" label="Guitare" rotation={[0, Math.PI / 2, 0]}>
         <GuitarModel stringTriggerRef={stringTriggerRef} interactive={poiActive} />
         {poiActive && <SimonPanel stringTriggerRef={stringTriggerRef} />}

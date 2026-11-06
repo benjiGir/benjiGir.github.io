@@ -4,6 +4,7 @@ import Workbench from '@/scene/corners/workbench/Workbench'
 import RetroCorner from '@/scene/corners/retro/RetroCorner'
 import LegoCorner from '@/scene/corners/lego/LegoCorner'
 import Editable from '@/editor/Editable'
+import { DESK_POSITION, ROBOT_MAT_CENTER } from '@/scene/roomLayout'
 import { Floor } from './Floor'
 import { Room } from './Room'
 import { DeskModel } from './DeskModel'
@@ -12,31 +13,17 @@ import { Tower } from './Tower'
 import { Keyboard } from './Keyboard'
 import { Mouse } from './Mouse'
 import { DeskLamp } from './DeskLamp'
-import {Chair} from "@/scene/desk/Chair.tsx";
-
-// ─── Root ─────────────────────────────────────────────────────────────────────
+import { Chair } from './Chair'
 
 export default function DeskScene() {
   return (
     <group>
       <Floor />
       <Room />
-      {/* Bureau reculé contre le mur du fond — coordonnées internes inchangées */}
-      <group position={[0, 0, -1.3]}>
-        {/* Tapis sous le bureau */}
-        <mesh position={[0, 0.005, 0.2]} receiveShadow>
-          <boxGeometry args={[2.2, 0.01, 1.8]} />
-          <meshStandardMaterial color="#8b7355" roughness={0.95} metalness={0} />
-        </mesh>
-        {/* Bureau (GLB) — déplaçable/redimensionnable au gizmo via l'éditeur de scène.
-            Transform de base À AJUSTER À L'ŒIL : l'échelle/orientation natives du GLB sont
-            inconnues ; l'utilisateur calibrera ensuite dans l'éditeur (sauvé dans scene-overrides.json). */}
+      <group position={DESK_POSITION} rotation={[0, Math.PI / 2, 0]}>
         <Editable id="desk" label="Bureau">
-          <group scale={1} position={[0, 0, 0]}>
-            <DeskModel />
-          </group>
+          <DeskModel />
         </Editable>
-        {/* Objets posés sur le bureau — placements pilotés par scene-overrides.json */}
         <Monitor />
         <Tower />
         <Keyboard />
@@ -44,6 +31,10 @@ export default function DeskScene() {
         <DeskLamp />
         <Chair />
       </group>
+      <mesh position={[ROBOT_MAT_CENTER[0], 0.004, ROBOT_MAT_CENTER[1]]} receiveShadow>
+        <boxGeometry args={[1.34, 0.008, 1.34]} />
+        <meshStandardMaterial color="#526d7c" roughness={0.95} />
+      </mesh>
       <Robot />
       <Guitar />
       <Workbench />

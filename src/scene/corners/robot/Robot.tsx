@@ -59,7 +59,7 @@ export default function Robot() {
   }
 
   return (
-    <Hotspot poi="robot" label="Robot NAO" position={[0, 0, 0]}>
+    <Hotspot poi="robot" label="Robot NAO">
       <group onClick={handleClick}>
         <RobotModel ref={modelRef} />
       </group>

@@ -1,65 +1,72 @@
-// Registre des points d'intérêt (POI) caméra — chaque entrée décrit la position et la cible
-// de `CameraControls.setLookAt`, ainsi que d'éventuelles contraintes de distance spécifiques
-// (ex. zoom serré sur l'écran). `CameraRig` consomme ce registre, `Hotspot` y référence ses POI.
+import {
+  CRT_POSITION,
+  DESK_POSITION,
+  GUITAR_POSITION,
+  LEGO_POSITION,
+  ROBOT_MAT_CENTER,
+  WORKBENCH_POSITION,
+} from '@/scene/roomLayout'
 
 export type PoiId = 'overview' | 'screen' | 'guitar' | 'workbench' | 'crt' | 'legos' | 'robot'
 
+type Point = readonly [number, number, number]
+
 export interface PoiConfig {
-  /** Position de la caméra. */
-  pos: readonly [number, number, number]
-  /** Point regardé. */
-  target: readonly [number, number, number]
-  /** Distance min à la cible (remplace `minDistance` global de CameraControls quand le POI est actif). */
-  minDist?: number
-  /** Distance max à la cible (idem `maxDistance`). */
-  maxDist?: number
+  pos: Point
+  target: Point
+  minDist: number
+  maxDist: number
 }
 
-// Dalle écran centrée à y≈1.13, z≈-1.5 (bureau reculé contre le mur du fond, Δz=-1.3)
+function offset([x, y, z]: Point, dx: number, dy: number, dz: number): Point {
+  return [x + dx, y + dy, z + dz]
+}
+
+// Centre de la dalle après la calibration du moniteur et la rotation du bureau.
+const screen = offset(DESK_POSITION, 0.025, 1.005, 0.09)
+const robotMat: Point = [ROBOT_MAT_CENTER[0], 0, ROBOT_MAT_CENTER[1]]
+
 export const POIS: Record<PoiId, PoiConfig> = {
   overview: {
-    pos: [0, 2.4, 4.6],
-    target: [0, 0.85, -0.6],
+    pos: [0, 1.98, 3.5],
+    target: [0, 1.16, -2.05],
+    minDist: 4.5,
+    maxDist: 5.62,
   },
   screen: {
-    pos: [0, 1.13, -0.45],
-    target: [0, 1.13, -1.5],
-    minDist: 0.4,
-    maxDist: 1.2,
+    pos: offset(screen, 0.58, 0.12, 0),
+    target: screen,
+    minDist: 0.42,
+    maxDist: 0.69,
   },
-  // Coin musique — mur gauche, juste après la fenêtre (ouverture en z∈[1.18,1.82])
   guitar: {
-    pos: [-2.6, 1.3, 2.5],
-    target: [-3.85, 1.0, 2.35],
-    minDist: 0.8,
-    maxDist: 2.5,
+    pos: offset(GUITAR_POSITION, -0.97, 1.25, 0.99),
+    target: offset(GUITAR_POSITION, -0.2, 0.72, 0.02),
+    minDist: 1.15,
+    maxDist: 1.4,
   },
-  // Coin atelier — mur du fond droit (phase 4)
   workbench: {
-    pos: [1.4, 1.4, -2.0],
-    target: [2.4, 1.0, -3.6],
-    minDist: 0.8,
-    maxDist: 2.5,
+    pos: offset(WORKBENCH_POSITION, 0.25, 1.42, 1.66),
+    target: offset(WORKBENCH_POSITION, 0, 0.86, -0.03),
+    minDist: 1.03,
+    maxDist: 1.93,
   },
-  // Coin jeu — mur du fond gauche, TV CRT (phase 5)
   crt: {
-    pos: [-1.4, 1.2, -2.0],
-    target: [-2.4, 0.6, -3.6],
-    minDist: 0.8,
-    maxDist: 2.5,
+    pos: offset(CRT_POSITION, -0.37, 1.18, 1.32),
+    target: offset(CRT_POSITION, -0.13, 0.75, 0.17),
+    minDist: 0.9,
+    maxDist: 1.65,
   },
-  // Coin legos — premier plan droit (phase 6)
   legos: {
-    pos: [1.6, 1.4, 2.4],
-    target: [2.6, 0.6, 1.2],
-    minDist: 0.8,
-    maxDist: 2.5,
+    pos: offset(LEGO_POSITION, 0.37, 1.37, 1.12),
+    target: offset(LEGO_POSITION, 0, 0.52, 0),
+    minDist: 0.94,
+    maxDist: 1.75,
   },
-  // Tapis du robot NAO — zone dégagée à droite, décalée de l'axe caméra↔bureau (phase 2)
   robot: {
-    pos: [1.6, 1.3, 1.8],
-    target: [0.6, 0.2, 2.6],
-    minDist: 0.6,
-    maxDist: 3,
+    pos: offset(robotMat, -0.27, 1.39, 1.54),
+    target: offset(robotMat, 0, 0.27, 0),
+    minDist: 1.35,
+    maxDist: 2.12,
   },
 }

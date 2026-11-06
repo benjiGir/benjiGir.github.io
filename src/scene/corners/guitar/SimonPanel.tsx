@@ -102,7 +102,7 @@ export function SimonPanel({ stringTriggerRef }: SimonPanelProps) {
   })
 
   return (
-    <Html position={[0.55, 0.6, 0]} transform distanceFactor={1.1} occlude={false}>
+    <Html position={[-0.48, 0.6, 0]} transform distanceFactor={1.1} occlude={false}>
       <div
         style={{
           width: 190,

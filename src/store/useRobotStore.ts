@@ -1,16 +1,12 @@
 import { create } from 'zustand'
+import { ROBOT_MAT_CENTER } from '@/scene/roomLayout'
 
-// Grille logique du tapis sur laquelle évolue le robot NAO. Le tapis 3D dédié au robot mesure
-// 1.6 × 1.6 m, centré en (0.6, 0.005, 2.6) — zone dégagée à droite, décalée de l'axe
-// caméra↔bureau (voir `scene/desk/Room.tsx`). La grille 6×6 (span = (GRID_SIZE-1)*CELL_SIZE
-// = 1.0 m) est centrée sur ce tapis.
 export const GRID_SIZE = 6
 export const CELL_SIZE = 0.2
-// Coin (0, 0) de la grille en coordonnées monde (X, Z) — la cellule (col, row) est centrée en
-// (GRID_ORIGIN_X + col * CELL_SIZE, GRID_ORIGIN_Z + row * CELL_SIZE). Centré sur le tapis du
-// robot, cohérent avec le cadrage du POI 'robot' (cf. scene/camera/pois.ts).
-export const GRID_ORIGIN_X = 0.1
-export const GRID_ORIGIN_Z = 2.1
+// Centre de la première cellule, mesuré depuis le centre du tapis.
+const HALF_GRID_SPAN = ((GRID_SIZE - 1) * CELL_SIZE) / 2
+export const GRID_ORIGIN_X = ROBOT_MAT_CENTER[0] - HALF_GRID_SPAN
+export const GRID_ORIGIN_Z = ROBOT_MAT_CENTER[1] - HALF_GRID_SPAN
 
 /** Convertit une coordonnée de grille (col, row) en position monde (x, z). */
 export function cellToWorld(col: number, row: number): [number, number] {
