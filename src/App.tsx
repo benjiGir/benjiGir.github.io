@@ -1,13 +1,14 @@
-import { Suspense } from 'react'
+import { Suspense, useCallback, useState } from 'react'
 import { Canvas } from '@react-three/fiber'
-import { Loader } from '@react-three/drei'
 import Experience from '@/scene/core/Experience'
+import SceneReady from '@/scene/core/SceneReady'
 import { POIS } from '@/scene/camera/pois'
 import CameraUI from '@/components/CameraUI'
 import MobileWarning from '@/components/MobileWarning'
 import WipBadge from '@/components/WipBadge'
 import AudioUnlock from '@/components/AudioUnlock'
 import MuteToggle from '@/components/MuteToggle'
+import SceneLoader from '@/components/SceneLoader'
 import FullscreenOverlay from '@/os/window/FullscreenOverlay'
 import ScreenPortal from '@/os/window/ScreenPortal'
 import EditorPanel from '@/editor/EditorPanel'
@@ -15,6 +16,9 @@ import EditorPanel from '@/editor/EditorPanel'
 const DEBUG = import.meta.env.VITE_DEBUG === 'true'
 
 export default function App() {
+  const [ready, setReady] = useState(false)
+  const onReady = useCallback(() => setReady(true), [])
+
   return (
     <>
       <Canvas
@@ -30,9 +34,10 @@ export default function App() {
       >
         <Suspense fallback={null}>
           <Experience />
+          {!ready && <SceneReady onReady={onReady} />}
         </Suspense>
       </Canvas>
-      <Loader />
+      <SceneLoader ready={ready} />
       <CameraUI />
       <FullscreenOverlay />
       <ScreenPortal />

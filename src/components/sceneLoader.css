@@ -1,0 +1,215 @@
+.scene-boot {
+  position: fixed;
+  inset: 0;
+  z-index: 11000;
+  display: grid;
+  align-items: safe center;
+  justify-items: center;
+  overflow: auto;
+  padding: clamp(12px, 4vw, 48px);
+  color: #e2e8f0;
+  background: #0d1525;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+}
+
+.scene-boot[data-ready='true'] {
+  pointer-events: none;
+  animation: boot-reveal 360ms ease-out both;
+}
+
+.boot-window {
+  width: min(100%, 710px);
+  overflow: hidden;
+  border: 1px solid #334155;
+  border-radius: 10px;
+  background: #141c2b;
+  box-shadow: 0 24px 64px #0006;
+}
+
+.boot-window__bar {
+  position: relative;
+  display: grid;
+  place-items: center;
+  min-height: 36px;
+  border-bottom: 1px solid #ffffff0f;
+  background: #ffffff0a;
+  color: #aeb9c9;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.boot-window__lights {
+  position: absolute;
+  left: 12px;
+  display: flex;
+  gap: 6px;
+}
+
+.boot-window__lights i {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: #ff5f57;
+}
+
+.boot-window__lights i:nth-child(2) {
+  background: #febc2e;
+}
+
+.boot-window__lights i:nth-child(3) {
+  background: #28c840;
+}
+
+.boot-window__body {
+  padding: clamp(12px, 3vw, 24px);
+}
+
+.boot-window__preview {
+  overflow: hidden;
+  border-radius: 4px;
+  background: #eae4d8;
+}
+
+.boot-blueprint {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.boot-window__body h1 {
+  margin-top: clamp(14px, 3vw, 22px);
+  font-size: clamp(1.65rem, 3.4vw, 2.5rem);
+  font-weight: 650;
+  line-height: 1.2;
+  letter-spacing: -0.025em;
+}
+
+.boot-progress {
+  margin-top: 14px;
+  padding: clamp(12px, 2.5vw, 16px);
+  border: 1px solid #334155;
+  border-radius: 6px;
+  background: #101827;
+}
+
+.boot-progress__label {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  color: #f1f5f9;
+  font-size: clamp(0.875rem, 2vw, 1.05rem);
+  font-weight: 600;
+  line-height: 1.35;
+  font-variant-numeric: tabular-nums;
+}
+
+.boot-progress__value {
+  color: #a3c8fc;
+  white-space: nowrap;
+}
+
+.boot-progress__track {
+  height: 8px;
+  margin-top: 12px;
+  overflow: hidden;
+  border-radius: 4px;
+  background: #334155;
+}
+
+.boot-progress__track span {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: #72a4ec;
+  transition: width 180ms ease-out;
+}
+
+.boot-progress__track[data-indeterminate='true'] span {
+  width: 28%;
+  animation: boot-progress-sweep 1.5s ease-in-out infinite;
+}
+
+.boot-progress__steps {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 20px;
+  margin-top: 12px;
+  list-style: none;
+  color: #aeb9c9;
+  font-size: 12px;
+  line-height: 1.4;
+}
+
+.boot-progress__steps li {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+}
+
+.boot-progress__steps li::before {
+  content: '';
+  display: block;
+  width: 7px;
+  height: 7px;
+  border: 1px solid currentColor;
+  border-radius: 50%;
+}
+
+.boot-progress__steps li[data-step='current'] {
+  color: #a3c8fc;
+  font-weight: 650;
+}
+
+.boot-progress__steps li[data-step='current']::before {
+  background: currentColor;
+}
+
+.boot-progress__steps li[data-step='done']::before {
+  width: 5px;
+  height: 8px;
+  margin-inline: 1px;
+  border-width: 0 1px 1px 0;
+  border-radius: 0;
+  color: #a5b891;
+  transform: translateY(-1px) rotate(45deg);
+}
+
+@keyframes boot-progress-sweep {
+  from {
+    transform: translateX(-100%);
+  }
+
+  to {
+    transform: translateX(360%);
+  }
+}
+
+@keyframes boot-reveal {
+  to {
+    opacity: 0;
+  }
+}
+
+@media (max-height: 530px) {
+  .boot-blueprint {
+    width: auto;
+    max-width: 100%;
+    max-height: 46dvh;
+    margin-inline: auto;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .scene-boot[data-ready='true'] {
+    animation-duration: 1ms;
+  }
+
+  .boot-progress__track[data-indeterminate='true'] span {
+    animation: none;
+  }
+
+  .boot-progress__track span {
+    transition: none;
+  }
+}
