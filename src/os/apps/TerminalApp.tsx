@@ -29,14 +29,11 @@ export default function TerminalApp() {
 
   function submit() {
     const cmd = input.trim()
-    let newCwd = cwd
 
     const ctx: CmdCtx = {
       cwd,
       history,
-      setCwd: (p) => {
-        newCwd = p
-      },
+      setCwd,
       openApp: (id) => {
         const meta = APP_REGISTRY[id]
         if (meta) {
@@ -58,7 +55,6 @@ export default function TerminalApp() {
       ])
     }
 
-    setCwd(newCwd)
     if (cmd) setHistory((h) => [cmd, ...h])
     setInput('')
     setHistIdx(-1)
