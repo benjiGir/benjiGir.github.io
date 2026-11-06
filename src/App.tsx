@@ -8,10 +8,12 @@ import MobileWarning from '@/components/MobileWarning'
 import WipBadge from '@/components/WipBadge'
 import AudioUnlock from '@/components/AudioUnlock'
 import MuteToggle from '@/components/MuteToggle'
+import LightingToggle from '@/components/LightingToggle'
 import SceneLoader from '@/components/SceneLoader'
 import FullscreenOverlay from '@/os/window/FullscreenOverlay'
 import ScreenPortal from '@/os/window/ScreenPortal'
 import EditorPanel from '@/editor/EditorPanel'
+import '@/components/sceneControls.css'
 
 const DEBUG = import.meta.env.VITE_DEBUG === 'true'
 
@@ -38,13 +40,18 @@ export default function App() {
         </Suspense>
       </Canvas>
       <SceneLoader ready={ready} />
-      <CameraUI />
+      {ready && <CameraUI />}
       <FullscreenOverlay />
       <ScreenPortal />
       <MobileWarning />
       <WipBadge />
       <AudioUnlock />
-      <MuteToggle />
+      {ready && (
+        <div className="scene-controls">
+          <LightingToggle />
+          <MuteToggle />
+        </div>
+      )}
       {DEBUG && <EditorPanel />}
     </>
   )

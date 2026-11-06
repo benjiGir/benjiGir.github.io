@@ -1,0 +1,98 @@
+.scene-hotspot {
+  z-index: 6;
+  pointer-events: none;
+}
+
+.scene-hotspot__button {
+  --marker-color: #a8e4ff;
+
+  display: grid;
+  width: 34px;
+  height: 34px;
+  place-items: center;
+  border: 1px solid var(--marker-color);
+  border-radius: 50%;
+  background: #142334;
+  box-shadow: 0 2px 8px #06101e80;
+  color: var(--marker-color);
+  cursor: pointer;
+  pointer-events: auto;
+  touch-action: manipulation;
+  user-select: none;
+}
+
+.scene-hotspot__button[data-poi='guitar'] {
+  --marker-color: #f6b8ce;
+}
+
+.scene-hotspot__button[data-poi='workbench'] {
+  --marker-color: #ffce95;
+}
+
+.scene-hotspot__button[data-poi='crt'] {
+  --marker-color: #c9b7ff;
+}
+
+.scene-hotspot__button[data-poi='legos'] {
+  --marker-color: #f7e58e;
+}
+
+.scene-hotspot__button[data-poi='robot'] {
+  --marker-color: #a1edc9;
+}
+
+.scene-hotspot__button svg {
+  width: 17px;
+  height: 17px;
+  fill: none;
+  stroke: currentColor;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 1.65;
+  pointer-events: none;
+}
+
+.scene-hotspot__label {
+  position: absolute;
+  bottom: calc(100% + 7px);
+  left: 50%;
+  padding: 4px 8px;
+  transform: translateX(-50%);
+  border-radius: 5px;
+  background: #142334;
+  color: #f5f9ff;
+  font: 600 12px/1.4 system-ui, sans-serif;
+  white-space: nowrap;
+  visibility: hidden;
+  pointer-events: none;
+}
+
+.scene-hotspot__button:focus-visible {
+  outline: 2px solid #fff;
+  outline-offset: 3px;
+}
+
+.scene-hotspot__button:focus-visible .scene-hotspot__label {
+  visibility: visible;
+}
+
+@media (hover: hover) {
+  .scene-hotspot__button:hover {
+    background: var(--marker-color);
+    color: #142334;
+  }
+
+  .scene-hotspot__button:hover .scene-hotspot__label {
+    visibility: visible;
+  }
+}
+
+@media (pointer: coarse) {
+  .scene-hotspot__button {
+    width: 44px;
+    height: 44px;
+  }
+}
+.scene-hotspot__button[hidden] {
+  display: none;
+}

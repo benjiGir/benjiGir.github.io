@@ -1,10 +1,13 @@
 import { RoundedBox } from '@react-three/drei'
+import { useLightingStore } from '@/store/useLightingStore'
 
 const OAK = '#b18760'
 const LINEN = '#e8dfcf'
 const SAGE = '#8f997c'
 
 export function Bedroom() {
+  const night = useLightingStore((s) => s.mode === 'night')
+
   return (
     <group>
       <RoundedBox
@@ -137,14 +140,23 @@ export function Bedroom() {
             color="#e8d7b9"
             roughness={0.86}
             emissive="#a96932"
-            emissiveIntensity={0.4}
+            emissiveIntensity={night ? 0.75 : 0.4}
           />
         </mesh>
         <mesh position={[0.036, 0.782, 0]} rotation={[Math.PI / 2, 0, 0]}>
           <circleGeometry args={[0.143, 24]} />
-          <meshStandardMaterial color="#ffe3b1" emissive="#f3bb76" emissiveIntensity={0.6} />
+          <meshStandardMaterial
+            color="#ffe3b1"
+            emissive="#f3bb76"
+            emissiveIntensity={night ? 1.1 : 0.6}
+          />
         </mesh>
-        <pointLight position={[0.036, 0.745, 0]} color="#ffd09a" intensity={0.75} distance={1.5} />
+        <pointLight
+          position={[0.036, 0.745, 0]}
+          color="#ffd09a"
+          intensity={night ? 1.2 : 0.75}
+          distance={night ? 2 : 1.5}
+        />
       </group>
     </group>
   )

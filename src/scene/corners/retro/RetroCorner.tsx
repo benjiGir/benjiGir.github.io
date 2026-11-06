@@ -12,6 +12,8 @@ import { GAME_WIDTH, GAME_HEIGHT, type GameInputs, type GameModule } from '@/lib
 import { SCREEN_TEX_W, SCREEN_TEX_H } from './crtShader'
 import { Cabinet } from './Cabinet'
 import { Console } from './Console'
+import { Daruma } from './Daruma'
+import { CABINET_TOP_Y } from './retroLayout'
 import { Tv } from './Tv'
 import { useGameLoop } from './useGameLoop'
 
@@ -115,6 +117,14 @@ export default function RetroCorner() {
         <Cabinet />
         <Tv texture={texture} on={on} />
         <Console on={on} canStart={canStart} onStart={startGame} />
+        <Editable
+          id="daruma"
+          label="Daruma"
+          position={[0.181, CABINET_TOP_Y, 0.183]}
+          rotation={[0, -0.12, 0]}
+        >
+          <Daruma />
+        </Editable>
       </Editable>
     </Hotspot>
   )

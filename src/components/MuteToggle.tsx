@@ -44,29 +44,13 @@ export default function MuteToggle() {
 
   return (
     <button
+      type="button"
+      className="scene-toggle"
       onClick={() => {
         toggleMute()
         if (muted) playClick()
       }}
       title={muted ? 'Activer le son' : 'Couper le son'}
-      style={{
-        position: 'fixed',
-        bottom: 24,
-        right: 24,
-        width: 40,
-        height: 40,
-        borderRadius: '50%',
-        border: 'none',
-        cursor: 'pointer',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        background: 'rgba(255,255,255,0.2)',
-        color: '#fff',
-        backdropFilter: 'blur(8px)',
-        transition: 'background 0.2s, color 0.2s',
-        zIndex: 10,
-      }}
     >
       {muted ? <IconMuted /> : <IconSound />}
     </button>

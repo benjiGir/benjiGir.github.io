@@ -60,10 +60,27 @@ type DeskLampModelProps = ThreeElements['group'] & {
   /** Lampe allumée/éteinte — pilote l'intensité du spot et l'émissive de l'ampoule. Le wrapper
    * (DeskLamp.tsx) lit le store et passe ce prop ; ce composant généré reste "dumb". */
   lit?: boolean
+  night?: boolean
+  lightIntensity?: number
+  lightColor?: string
 }
 
-export function DeskLampModel({ lit = true, ...props }: DeskLampModelProps) {
+export function DeskLampModel({
+  lit = true,
+  night = false,
+  lightIntensity = 2.5,
+  lightColor = '#ffd9a0',
+  ...props
+}: DeskLampModelProps) {
   const { nodes, materials } = useGLTF('/models/desklamp.opt.glb') as unknown as GLTFResult
+  const [dayTarget, nightTarget] = useMemo(() => {
+    // La cible jour garde le repère historique. La cible nuit suit la lampe et vise le bureau.
+    const day = new THREE.Object3D()
+    day.position.set(1, -1, 0.3)
+    const night = new THREE.Object3D()
+    night.position.set(2, -0.2, -1)
+    return [day, night] as const
+  }, [])
 
   // Clone du matériau de l'ampoule pour piloter son émissive selon `lit` sans muter l'objet
   // partagé par le cache de useGLTF — garde texture/couleur/roughness d'origine. Recalculé au
@@ -85,6 +102,7 @@ export function DeskLampModel({ lit = true, ...props }: DeskLampModelProps) {
 
   return (
     <group {...props} dispose={null}>
+      <primitive object={nightTarget} />
       <group rotation={[-Math.PI / 2, 0, 0]} scale={0.0592}>
         <group rotation={[Math.PI / 2, 0, 0]}>
           <group position={[-4.98602, 32.56076, 0]} rotation={[Math.PI, 0, 2.45473]}>
@@ -199,12 +217,12 @@ export function DeskLampModel({ lit = true, ...props }: DeskLampModelProps) {
                 wrapper peut en ajouter un si besoin ; ce composant reste un simple on/off). */}
             {lit && (
               <spotLight
-                position={[1, -0, 0]}
-                target-position={[1, -1, 0.3]}
-                color="#ffd9a0"
-                intensity={2.5}
-                angle={0.5}
-                penumbra={0.6}
+                position={[1, 0, 0]}
+                target={night ? nightTarget : dayTarget}
+                color={lightColor}
+                intensity={lightIntensity}
+                angle={night ? 0.68 : 0.5}
+                penumbra={night ? 0.8 : 0.6}
                 decay={2}
                 distance={1.5}
                 castShadow

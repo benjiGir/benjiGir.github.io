@@ -273,31 +273,6 @@ export function setBrickInstance(
   }
 }
 
-// Échelle quasi nulle utilisée pour "cacher" une instance hors champ (sous le plateau).
-const HIDDEN_SCALE = 0.0001
-
-/**
- * Place l'instance `index` (et ses tenons éventuels) hors champ — utilisé pour les pièces pas
- * encore révélées par l'étape courante. Réutilise les mêmes scratch `tmp*` que
- * `setBrickInstance` (jamais utilisés simultanément dans la même frame).
- */
-export function hideBrickInstance(
-  mesh: THREE.InstancedMesh,
-  studMesh: THREE.InstancedMesh | null,
-  index: number,
-  studIndices: number[]
-) {
-  tmpMatrix.compose(
-    tmpPos.set(0, -5, 0),
-    tmpQuat.identity(),
-    tmpScale.set(HIDDEN_SCALE, HIDDEN_SCALE, HIDDEN_SCALE)
-  )
-  mesh.setMatrixAt(index, tmpMatrix)
-  if (studMesh) {
-    for (const si of studIndices) studMesh.setMatrixAt(si, tmpMatrix)
-  }
-}
-
 // ─── Animation de chute (plateau de montage) ─────────────────────────────────────
 
 // Hauteur de chute d'arrivée (animation flottante) — chaque pièce nouvellement révélée part

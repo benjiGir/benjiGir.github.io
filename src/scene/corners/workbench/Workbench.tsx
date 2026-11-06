@@ -3,6 +3,8 @@ import { Object3D } from 'three'
 import Hotspot from '@/scene/camera/Hotspot'
 import Editable from '@/editor/Editable'
 import { useCameraStore } from '@/store/useCameraStore'
+import { useLightingStore } from '@/store/useLightingStore'
+import { useEditorStore } from '@/editor/useEditorStore'
 import { WORKBENCH_POSITION } from '@/scene/roomLayout'
 import { Table } from './Table'
 import { Breadboard } from './Breadboard'
@@ -14,6 +16,8 @@ import { SolderingStation } from './SolderingStation'
 import { ToolWall } from './ToolWall'
 
 function WorkbenchLight() {
+  const night = useLightingStore((s) => s.mode === 'night')
+  const lightOverride = useEditorStore((s) => s.overrides.workbench?.light)
   const target = useMemo(() => {
     const object = new Object3D()
     object.position.set(0, 0.77, 0.14)
@@ -34,7 +38,11 @@ function WorkbenchLight() {
       </mesh>
       <mesh position={[0, 1.507, -0.207]}>
         <boxGeometry args={[1.095, 0.004, 0.032]} />
-        <meshStandardMaterial color="#f6e2bd" emissive="#ffdc9d" emissiveIntensity={0.32} />
+        <meshStandardMaterial
+          color="#f6e2bd"
+          emissive="#ffdc9d"
+          emissiveIntensity={night ? 1.05 : 0.32}
+        />
       </mesh>
       <primitive object={target} />
       <spotLight
@@ -42,8 +50,8 @@ function WorkbenchLight() {
         target={target}
         angle={0.79}
         penumbra={0.8}
-        color="#fff1d8"
-        intensity={0.72}
+        color={lightOverride?.color ?? '#fff1d8'}
+        intensity={lightOverride?.intensity ?? (night ? 1.8 : 0.72)}
         distance={2.1}
       />
     </group>

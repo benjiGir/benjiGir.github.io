@@ -11,7 +11,6 @@ import {
   PLATE_CENTER,
   PLATE_SIZE,
   PLATE_THICKNESS,
-  hideBrickInstance,
   setBrickInstance,
   stepOffsets,
   type BrickDef,
@@ -22,6 +21,23 @@ import {
 
 interface BuildPlateProps {
   active: boolean
+}
+
+const HIDDEN_OFFSET = Math.fround(FALL_HEIGHT)
+
+function offsetsSettled(offsets: Float32Array, visibleCount: number) {
+  for (let i = 0; i < offsets.length; i++) {
+    if (offsets[i] !== (i < visibleCount ? 0 : HIDDEN_OFFSET)) return false
+  }
+  return true
+}
+
+function raycastVisibleWheel(
+  this: THREE.Mesh,
+  raycaster: THREE.Raycaster,
+  intersects: THREE.Intersection[]
+) {
+  if (this.visible) THREE.Mesh.prototype.raycast.call(this, raycaster, intersects)
 }
 
 export function BuildPlate({ active }: BuildPlateProps) {
@@ -78,35 +94,43 @@ export function BuildPlate({ active }: BuildPlateProps) {
   const wheelOffsetsRef = useRef(new Float32Array(allWheels.length).fill(FALL_HEIGHT))
   // Objet réutilisé pour `damp()` (qui mute `obj[prop]`) — évite une allocation par pièce/frame
   const dampObjRef = useRef({ v: 0 })
+  const settledStepRef = useRef<number | null>(0)
 
   useFrame((_, delta) => {
+    if (settledStepRef.current === step) return
+
     const brickMesh = brickMeshRef.current
     const studMesh = studMeshRef.current
     if (!brickMesh) return
 
+    settledStepRef.current = null
     const visibleBricks = step === 0 ? 0 : brickStepRanges[step - 1][1]
     const visibleWheels = step === 0 ? 0 : wheelStepRanges[step - 1][1]
+    const brickOffsets = brickOffsetsRef.current
+    const wheelOffsets = wheelOffsetsRef.current
 
-    stepOffsets(brickOffsetsRef.current, visibleBricks, delta, dampObjRef.current)
-    stepOffsets(wheelOffsetsRef.current, visibleWheels, delta, dampObjRef.current)
+    stepOffsets(brickOffsets, visibleBricks, delta, dampObjRef.current)
+    stepOffsets(wheelOffsets, visibleWheels, delta, dampObjRef.current)
 
-    for (let i = 0; i < allBricks.length; i++) {
-      const brick = allBricks[i]
-      const visible = i < visibleBricks
-      if (!visible) {
-        // Brique pas encore révélée : la place hors champ (sous le plateau, invisible)
-        hideBrickInstance(brickMesh, studMesh, i, studIndicesPerBrick[i])
-        continue
-      }
-      const offset = brickOffsetsRef.current[i]
-      setBrickInstance(brickMesh, studMesh, i, studIndicesPerBrick[i], brick, offset)
+    let visibleStuds = 0
+    for (let i = 0; i < visibleBricks; i++) {
+      const studIndices = studIndicesPerBrick[i]
+      setBrickInstance(brickMesh, studMesh, i, studIndices, allBricks[i], brickOffsets[i])
+      visibleStuds += studIndices.length
     }
 
-    brickMesh.instanceMatrix.needsUpdate = true
-    if (brickMesh.instanceColor) brickMesh.instanceColor.needsUpdate = true
-    if (studMesh) {
-      studMesh.instanceMatrix.needsUpdate = true
-      if (studMesh.instanceColor) studMesh.instanceColor.needsUpdate = true
+    // Le rendu et le raycast parcourent uniquement les instances visibles.
+    brickMesh.count = visibleBricks
+    if (studMesh) studMesh.count = visibleStuds
+    if (visibleBricks > 0) {
+      brickMesh.instanceMatrix.needsUpdate = true
+      if (brickMesh.instanceColor) brickMesh.instanceColor.needsUpdate = true
+      brickMesh.computeBoundingSphere()
+      if (studMesh && visibleStuds > 0) {
+        studMesh.instanceMatrix.needsUpdate = true
+        if (studMesh.instanceColor) studMesh.instanceColor.needsUpdate = true
+        studMesh.computeBoundingSphere()
+      }
     }
 
     // Roues (meshes individuels — seulement 4, pas d'instancing nécessaire)
@@ -114,19 +138,23 @@ export function BuildPlate({ active }: BuildPlateProps) {
       const wheelMesh = wheelRefs.current[i]
       if (!wheelMesh) continue
       const visible = i < visibleWheels
-      const wheel = allWheels[i]
-      if (!visible) {
-        wheelMesh.visible = false
-        continue
-      }
-      wheelMesh.visible = true
-      wheelMesh.position.set(wheel.pos[0], wheel.pos[1] + wheelOffsetsRef.current[i], wheel.pos[2])
+      wheelMesh.visible = visible
+      if (!visible) continue
+      const [x, y, z] = allWheels[i].pos
+      wheelMesh.position.set(x, y + wheelOffsets[i], z)
+    }
+
+    if (
+      offsetsSettled(brickOffsets, visibleBricks) &&
+      offsetsSettled(wheelOffsets, visibleWheels)
+    ) {
+      settledStepRef.current = step
     }
   })
 
   function handlePlateClick(e: ThreeEvent<MouseEvent>) {
-    e.stopPropagation()
     if (!active) return
+    e.stopPropagation()
     if (step >= CAR_TOTAL_STEPS) return
     playClick()
     next(CAR_TOTAL_STEPS)
@@ -152,6 +180,7 @@ export function BuildPlate({ active }: BuildPlateProps) {
       <instancedMesh
         ref={brickMeshRef}
         args={[undefined, undefined, allBricks.length]}
+        count={0}
         castShadow
         receiveShadow
       >
@@ -160,7 +189,12 @@ export function BuildPlate({ active }: BuildPlateProps) {
       </instancedMesh>
       {/* Tenons des briques (instanciés) */}
       {totalStuds > 0 && (
-        <instancedMesh ref={studMeshRef} args={[undefined, undefined, totalStuds]} castShadow>
+        <instancedMesh
+          ref={studMeshRef}
+          args={[undefined, undefined, totalStuds]}
+          count={0}
+          castShadow
+        >
           <cylinderGeometry args={[1, 1, 1, 12]} />
           <meshStandardMaterial roughness={0.4} />
         </instancedMesh>
@@ -174,6 +208,7 @@ export function BuildPlate({ active }: BuildPlateProps) {
           }}
           rotation={[0, 0, Math.PI / 2]}
           visible={false}
+          raycast={raycastVisibleWheel}
           castShadow
         >
           <cylinderGeometry args={[wheel.radius, wheel.radius, wheel.width, 16]} />

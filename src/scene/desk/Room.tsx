@@ -1,7 +1,11 @@
-import { Color, DoubleSide } from 'three'
+import { useTexture } from '@react-three/drei'
+import { Color, DoubleSide, SRGBColorSpace } from 'three'
+import fujiPrintUrl from '@/assets/fuji-print.svg'
 import Editable from '@/editor/Editable'
 import { ROOM_BACK_Z, ROOM_DEPTH, ROOM_FRONT_Z, ROOM_WIDTH } from '@/scene/roomLayout'
+import { useLightingStore } from '@/store/useLightingStore'
 import { Bedroom } from './Bedroom'
+import { Bonsai } from './Bonsai'
 import { HousePlantModel } from './HousePlantModel'
 
 type Vec3 = [number, number, number]
@@ -126,6 +130,8 @@ function BackWall() {
 }
 
 function Window() {
+  const night = useLightingStore((s) => s.mode === 'night')
+
   return (
     <group position={[-WINDOW_Z, WINDOW_Y, 0]}>
       <Editable id="window" label="Fenêtre">
@@ -153,13 +159,18 @@ function Window() {
         {/* Seuls le cadre et les croisillons projettent une ombre sur l'ouverture. */}
         <mesh position={[0, 0, -0.084]}>
           <planeGeometry args={[PANE_WIDTH, PANE_HEIGHT]} />
-          <meshStandardMaterial color="#d6e4ee" transparent opacity={0.18} depthWrite={false} />
+          <meshStandardMaterial
+            color="#d6e4ee"
+            transparent
+            opacity={night ? 0.07 : 0.18}
+            depthWrite={false}
+          />
         </mesh>
         <mesh position={[0, 0, -0.118]}>
           <planeGeometry args={[PANE_WIDTH, PANE_HEIGHT]}>
             <bufferAttribute attach="attributes-color" args={[SKY_COLORS, 3]} />
           </planeGeometry>
-          <meshBasicMaterial vertexColors />
+          <meshBasicMaterial vertexColors color={night ? '#1c2b57' : '#ffffff'} />
         </mesh>
       </Editable>
       <Block
@@ -227,6 +238,9 @@ function Shelf() {
           />
         )
       })}
+      <Editable id="bonsai" label="Bonsaï" position={[0.3, 0.03, 0.15]}>
+        <Bonsai />
+      </Editable>
     </Editable>
   )
 }
@@ -270,6 +284,8 @@ function LeftWall() {
 }
 
 function Pendant() {
+  const night = useLightingStore((s) => s.mode === 'night')
+
   return (
     <group position={[0, WALL_HEIGHT, -0.3]}>
       <mesh position={[0, -0.02, 0]}>
@@ -286,14 +302,44 @@ function Pendant() {
           color="#e3c89f"
           roughness={0.94}
           emissive="#7b542d"
-          emissiveIntensity={0.26}
+          emissiveIntensity={night ? 0.52 : 0.26}
         />
       </mesh>
       <mesh position={[0, -0.541, 0]} rotation={[Math.PI / 2, 0, 0]}>
         <circleGeometry args={[0.318, 40]} />
-        <meshStandardMaterial color="#f0d6ad" emissive="#efbc79" emissiveIntensity={0.28} />
+        <meshStandardMaterial
+          color="#f0d6ad"
+          emissive="#efbc79"
+          emissiveIntensity={night ? 1.05 : 0.28}
+        />
       </mesh>
+      <pointLight
+        position={[0, -0.59, 0]}
+        color="#ffe0b1"
+        intensity={night ? 3.2 : 1.4}
+        distance={night ? 4.5 : 4}
+      />
     </group>
+  )
+}
+
+function FujiPrint() {
+  const print = useTexture(fujiPrintUrl, (texture) => {
+    texture.colorSpace = SRGBColorSpace
+  })
+
+  return (
+    <Editable id="photo" label="Estampe du mont Fuji" position={[-1.93, 1.73, 0]}>
+      <Block position={[0, 0, 0.0275]} size={[0.55, 0.69, 0.054]} color={BRONZE} />
+      <mesh position={[0, 0, 0.055]} receiveShadow>
+        <planeGeometry args={[0.516, 0.656]} />
+        <meshStandardMaterial color="#e3d8c6" roughness={0.96} />
+      </mesh>
+      <mesh position={[0, 0, 0.0555]} receiveShadow>
+        <planeGeometry args={[0.488, 0.61]} />
+        <meshStandardMaterial map={print} roughness={0.96} />
+      </mesh>
+    </Editable>
   )
 }
 
@@ -310,12 +356,7 @@ export function Room() {
           color={SAGE}
         />
         <WallTrim width={ROOM_DEPTH} />
-        <Editable id="photo" label="Cadre photo" position={[-1.93, 1.73, 0]}>
-          <Block position={[0, 0, 0.018]} size={[0.39, 0.49, 0.035]} color={BRONZE} />
-          <Block position={[0, 0, 0.038]} size={[0.345, 0.445, 0.011]} color="#e3d8c6" />
-          <Block position={[0, 0, 0.046]} size={[0.282, 0.35, 0.012]} color="#8f9696" />
-          <Block position={[0, -0.083, 0.053]} size={[0.282, 0.104, 0.005]} color="#777f6a" />
-        </Editable>
+        <FujiPrint />
       </group>
       <group position={[0, WALL_HEIGHT, ROOM_CENTER_Z]} rotation={[Math.PI / 2, 0, 0]}>
         <Panel position={[0, 0, 0]} width={ROOM_WIDTH} height={ROOM_DEPTH} color="#e9e0d1" />

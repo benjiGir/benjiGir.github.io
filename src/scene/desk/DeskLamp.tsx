@@ -2,6 +2,7 @@ import { useState } from 'react'
 import type { ThreeEvent } from '@react-three/fiber'
 import { Html } from '@react-three/drei'
 import { useLampStore } from '@/store/useLampStore'
+import { useLightingStore } from '@/store/useLightingStore'
 import { useEditorStore } from '@/editor/useEditorStore'
 import { playClick } from '@/lib/audio'
 import Editable from '@/editor/Editable'
@@ -18,7 +19,9 @@ export function DeskLamp() {
   const [hovered, setHovered] = useState(false)
   const isOn = useLampStore((s) => s.isOn)
   const toggleLamp = useLampStore((s) => s.toggleLamp)
+  const night = useLightingStore((s) => s.mode === 'night')
   const editing = useEditorStore((s) => s.enabled)
+  const lightOverride = useEditorStore((s) => s.overrides['desk-lamp']?.light)
 
   // Pas cliquable en mode éditeur — sinon le clic volerait la sélection du gizmo de l'<Editable>.
   const interactive = !editing
@@ -44,7 +47,12 @@ export function DeskLamp() {
           setHovered(false)
         }}
       >
-        <DeskLampModel lit={isOn} />
+        <DeskLampModel
+          lit={isOn}
+          night={night}
+          lightIntensity={lightOverride?.intensity ?? (night ? 1.6 : 2.5)}
+          lightColor={lightOverride?.color}
+        />
       </group>
       {/* Info-bulle au survol — indique l'action du clic */}
       {hovered && interactive && (

@@ -1,0 +1,41 @@
+.scene-controls {
+  position: fixed;
+  right: max(24px, env(safe-area-inset-right));
+  bottom: max(24px, env(safe-area-inset-bottom));
+  z-index: 10;
+  display: flex;
+  gap: 8px;
+}
+
+.scene-toggle {
+  display: grid;
+  width: 40px;
+  height: 40px;
+  place-items: center;
+  border: 1px solid #ffffff26;
+  border-radius: 50%;
+  background: #141c2bbf;
+  color: #fff;
+  backdrop-filter: blur(8px);
+  cursor: pointer;
+}
+
+.scene-toggle:hover {
+  background: #253752;
+}
+
+.scene-toggle[aria-pressed='true'] {
+  border-color: #a3c8fc80;
+  color: #b7d4ff;
+}
+
+.scene-toggle:focus-visible {
+  outline: 2px solid #b7d4ff;
+  outline-offset: 3px;
+}
+
+@media (max-width: 480px) {
+  .scene-controls {
+    bottom: max(84px, calc(env(safe-area-inset-bottom) + 60px));
+  }
+}
