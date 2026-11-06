@@ -8,7 +8,6 @@ import PowerSequence from './PowerSequence'
 import FreecamController from '@/editor/FreecamController'
 import SceneEditor from '@/editor/SceneEditor'
 
-// @ts-ignore
 const DEBUG = import.meta.env.VITE_DEBUG === 'true'
 
 export default function Experience() {

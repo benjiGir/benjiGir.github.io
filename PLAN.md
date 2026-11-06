@@ -10,7 +10,7 @@ Ce fichier est la référence : **lire la section de la phase en cours avant d'i
 - Si une dépendance doit être installée, **demander à Benjamin** de lancer `pnpm add …`.
 - Style : primitives Three.js procédurales uniquement (pas de GLB), cohérent avec
   `src/scene/DeskScene.tsx` (meshStandardMaterial, castShadow/receiveShadow, couleurs sobres).
-- Conventions : pas de semicolons, single quotes, 100 chars (Prettier). UI/commentaires en
+- Conventions : pas de semicolons, single quotes, 100 chars (oxfmt). UI/commentaires en
   français. Jamais de barrel `index.ts`. Alias `@` → `src/`.
 - État global : un store zustand par préoccupation dans `src/store/`, composants abonnés
   par sélecteurs.
@@ -222,7 +222,7 @@ de couleurs lego).
 ## Processus par phase
 
 1. Claude (orchestrateur) spawne `react-r3f-senior` avec : la section de phase de ce
-   fichier + les fichiers existants à lire + les contraintes (pas de commandes, prettier).
+   fichier + les fichiers existants à lire + les contraintes (pas de commandes, oxfmt).
 2. L'agent implémente. Benjamin lance `pnpm build` / `pnpm dev` et colle les erreurs.
 3. Corrections itératives. Si blocage : stopper et poser des questions à Benjamin.
 4. Benjamin valide visuellement avant de passer à la phase suivante.

@@ -161,8 +161,8 @@ export const useWindowStore = create<WindowStore>((set, get) => ({
     "dev": "vite",
     "build": "tsc && vite build",
     "preview": "vite preview",
-    "lint": "eslint src",
-    "format": "prettier --write src"
+    "lint": "oxlint src",
+    "format": "oxfmt src"
   },
   "dependencies": {
     "@react-three/csg": "^4.0.0",
