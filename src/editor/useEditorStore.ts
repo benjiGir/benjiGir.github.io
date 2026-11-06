@@ -21,6 +21,8 @@ export interface Override {
   scale?: Vec3
   /** Appliqué à TOUS les MeshStandardMaterial de l'entité (granularité entité, hors emissive). */
   material?: { color?: string; roughness?: number; metalness?: number }
+  /** Appliqué à TOUTES les THREE.Light de l'entité (granularité entité). */
+  light?: { intensity?: number; color?: string }
 }
 
 export type GizmoMode = 'translate' | 'rotate' | 'scale'
@@ -63,7 +65,7 @@ interface EditorStore {
   setSnapEnabled: (v: boolean) => void
   register: (entry: EditableEntry) => void
   unregister: (id: string) => void
-  /** Fusionne un delta de surcharge pour une entité (transform et/ou matériau). */
+  /** Fusionne un delta de surcharge pour une entité (transform, matériau et/ou lumière). */
   setOverride: (id: string, patch: Override) => void
   /** Écrit le buffer dans scene-overrides.json via le plugin Vite. Renvoie le succès. */
   save: () => Promise<boolean>
@@ -104,7 +106,8 @@ export const useEditorStore = create<EditorStore>((set, get) => ({
       const prev = s.overrides[id] ?? {}
       const material =
         patch.material || prev.material ? { ...prev.material, ...patch.material } : undefined
-      return { overrides: { ...s.overrides, [id]: { ...prev, ...patch, material } } }
+      const light = patch.light || prev.light ? { ...prev.light, ...patch.light } : undefined
+      return { overrides: { ...s.overrides, [id]: { ...prev, ...patch, material, light } } }
     }),
 
   save: async () => {

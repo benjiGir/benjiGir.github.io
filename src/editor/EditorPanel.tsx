@@ -3,7 +3,6 @@ import { button, useControls } from 'leva'
 import * as THREE from 'three'
 import { useEditorStore, type Vec3 } from '@/editor/useEditorStore'
 
-// @ts-ignore
 const DEBUG = import.meta.env.VITE_DEBUG === 'true'
 
 // ─── Helpers matériau ─────────────────────────────────────────────────────────
@@ -32,6 +31,29 @@ function applyMaterial(
     if (mat.color !== undefined) m.color.set(mat.color)
     if (mat.roughness !== undefined) m.roughness = mat.roughness
     if (mat.metalness !== undefined) m.metalness = mat.metalness
+  })
+}
+
+// ─── Helpers lumière ──────────────────────────────────────────────────────────
+
+/** Première THREE.Light trouvée dans l'entité — sert à amorcer les champs du panneau. Certaines
+ * lumières (ex. spot de la lampe de bureau) ne sont montées que conditionnellement par leur
+ * composant parent : tant qu'aucune n'est présente, les champs restent désactivés. */
+function readFirstLight(obj: THREE.Object3D): THREE.Light | null {
+  let found: THREE.Light | null = null
+  obj.traverse((child) => {
+    if (found) return
+    if (child instanceof THREE.Light) found = child
+  })
+  return found
+}
+
+/** Applique une surcharge à TOUTES les THREE.Light de l'entité. */
+function applyLight(obj: THREE.Object3D, light: { intensity?: number; color?: string }) {
+  obj.traverse((child) => {
+    if (!(child instanceof THREE.Light)) return
+    if (light.intensity !== undefined) child.intensity = light.intensity
+    if (light.color !== undefined) child.color.set(light.color)
   })
 }
 
@@ -70,6 +92,7 @@ function EditorControls() {
   const seed = useMemo(() => {
     if (!obj) return null
     const mat = readFirstStandardMaterial(obj)
+    const light = readFirstLight(obj)
     return {
       position: obj.position.toArray() as Vec3,
       rotation: [obj.rotation.x, obj.rotation.y, obj.rotation.z] as Vec3,
@@ -78,6 +101,9 @@ function EditorControls() {
       roughness: mat ? mat.roughness : 0.5,
       metalness: mat ? mat.metalness : 0,
       hasMat: !!mat,
+      lightIntensity: light ? light.intensity : 1,
+      lightColor: light ? '#' + light.color.getHexString() : '#ffffff',
+      hasLight: !!light,
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [obj, selectedId])
@@ -175,6 +201,31 @@ function EditorControls() {
           if (ctx.initial || !obj || !selectedId) return
           applyMaterial(obj, { metalness: v })
           useEditorStore.getState().setOverride(selectedId, { material: { metalness: v } })
+        },
+      },
+      intensité: {
+        label: 'intensité (lumière)',
+        value: seed?.lightIntensity ?? 1,
+        // Bornes calibrées sur les intensités réelles de la scène (spot lampe 2.5, directional
+        // fenêtre 2.2) avec de la marge, pour ne pas plafonner arbitrairement bas.
+        min: 0,
+        max: 5,
+        step: 0.05,
+        disabled: !seed?.hasLight,
+        onChange: (v: number, _p: string, ctx: LevaCtx) => {
+          if (ctx.initial || !obj || !selectedId) return
+          applyLight(obj, { intensity: v })
+          useEditorStore.getState().setOverride(selectedId, { light: { intensity: v } })
+        },
+      },
+      teinte: {
+        label: 'couleur (lumière)',
+        value: seed?.lightColor ?? '#ffffff',
+        disabled: !seed?.hasLight,
+        onChange: (v: string, _p: string, ctx: LevaCtx) => {
+          if (ctx.initial || !obj || !selectedId) return
+          applyLight(obj, { color: v })
+          useEditorStore.getState().setOverride(selectedId, { light: { color: v } })
         },
       },
       '💾 Sauvegarder': button(() => {

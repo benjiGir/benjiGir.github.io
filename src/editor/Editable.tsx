@@ -2,7 +2,6 @@ import { useLayoutEffect, useRef, type ReactNode } from 'react'
 import * as THREE from 'three'
 import { useEditorStore, type Vec3 } from '@/editor/useEditorStore'
 
-// @ts-ignore
 const DEBUG = import.meta.env.VITE_DEBUG === 'true'
 
 interface EditableProps {
@@ -20,7 +19,7 @@ const DEFAULT_SCALE: Vec3 = [1, 1, 1]
 
 /**
  * Enveloppe une portion de scène pour la rendre éditable en mode dev (gizmo, sélection,
- * surcharges de matériau).
+ * surcharges de matériau et de lumière).
  *
  * Deux groupes imbriqués :
  * - `pivotRef` (extérieur) porte la transform de l'entité (override sinon défaut JSX) et c'est
@@ -45,8 +44,8 @@ export default function Editable({
   const enabled = useEditorStore((s) => s.enabled)
 
   // Applique la transform effective (override sauvegardé sinon valeurs par défaut JSX), recentre le
-  // pivot sur le contenu, applique l'override matériau et s'enregistre. useLayoutEffect pour éviter
-  // tout flash visuel avant application.
+  // pivot sur le contenu, applique les overrides matériau/lumière et s'enregistre. useLayoutEffect
+  // pour éviter tout flash visuel avant application.
   useLayoutEffect(() => {
     const pivot = pivotRef.current
     const inner = innerRef.current
@@ -87,6 +86,20 @@ export default function Editable({
         if (materialOverride.color !== undefined) mat.color.set(materialOverride.color)
         if (materialOverride.roughness !== undefined) mat.roughness = materialOverride.roughness
         if (materialOverride.metalness !== undefined) mat.metalness = materialOverride.metalness
+      })
+    }
+
+    // Surcharge lumière — appliquée à toutes les THREE.Light descendantes (intensity/color
+    // existent sur tous les sous-types standards, pas besoin de filtrer plus finement). Certaines
+    // lumières (ex. spot de la lampe de bureau) ne sont montées que conditionnellement par leur
+    // composant parent : si l'entité n'en a aucune au moment du montage, l'override reste sans
+    // effet ici mais demeure dans le buffer pour la prochaine fois qu'une lumière apparaît.
+    const lightOverride = override?.light
+    if (lightOverride) {
+      pivot.traverse((child) => {
+        if (!(child instanceof THREE.Light)) return
+        if (lightOverride.intensity !== undefined) child.intensity = lightOverride.intensity
+        if (lightOverride.color !== undefined) child.color.set(lightOverride.color)
       })
     }
 
